@@ -41,7 +41,7 @@ class Bullet:
     def lifespan(self):
         self.lifetime += 1
         if self.lifetime >= 1000:
-            self.alive = True
+            self.alive = False
 
     def draw(self):
         self.screen.blit(self.image, (self.position[0], self.position[1]))
