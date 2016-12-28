@@ -33,8 +33,15 @@ def player_2_controls(afv):
     if pygame.key.get_pressed()[K_UP]:
         afv.forward()
 
-def player_3_controls():
-    pass
+def player_3_controls(afv):
+    if pygame.key.get_pressed()[K_j]:
+        afv.turn(2)
+    if pygame.key.get_pressed()[K_k]:
+        afv.backward()
+    if pygame.key.get_pressed()[K_l]:
+        afv.turn(-2)
+    if pygame.key.get_pressed()[K_i]:
+        afv.forward()
 
 
 def start_2_player(screen):
@@ -100,4 +107,76 @@ def start_2_player(screen):
 
 
 def start_3_player(screen):
-    game = True
+    class MainGame:
+        def __init__(self):
+            self.game = True
+
+        def new_maze(self):
+            my_maze = Maze(8)
+            my_maze.generate_maze()
+            my_maze.render_maze()
+            maze_image = pygame.image.load("maze.png").convert()
+            self.background = pygame.transform.scale(maze_image, window_size)
+
+        def refresh(self):
+            screen.blit(self.background, (0, 0))
+            for tank in tanks:
+                tank.move()
+                tank.draw()
+                tank.velocity = [0, 0]
+            for bullet in p1_bullets:
+                bullet.move()
+                bullet.draw()
+                bullet.lifespan()
+                if not p1_bullets[0].alive:
+                    p1_bullets.pop(0)
+            for bullet in p2_bullets:
+                bullet.move()
+                bullet.draw()
+                bullet.lifespan()
+                if not p2_bullets[0].alive:
+                    p2_bullets.pop(0)
+            for bullet in p3_bullets:
+                bullet.move()
+                bullet.draw()
+                bullet.lifespan()
+                if not p3_bullets[0].alive:
+                    p3_bullets.pop(0)
+
+    game = MainGame()
+    game.new_maze()
+    tanks = []
+    p1_bullets = []
+    p2_bullets = []
+    p3_bullets = []
+    tanks.append(Tank(screen, [550, 550], "Player 1", "Assets/AFV1.png"))
+    tanks.append(Tank(screen, [270, 250], "Player 2", "Assets/AFV2.png"))
+    tanks.append(Tank(screen, [100, 750], "Player 3", "Assets/AFV1.png"))
+    while game.game:
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                sys.exit()
+            if event.type == KEYDOWN:
+                if event.key == K_e:
+                    if len(p1_bullets) < 10:
+                        print("Fire!")
+                        p1_bullets.append(Bullet(screen, [tanks[0].position[0], tanks[0].position[1]],
+                                                 [2 * degcos(tanks[0].angle), -2 * degsin(tanks[0].angle)]))
+                if event.key == K_KP0:
+                    if len(p2_bullets) < 10:
+                        print("Fire!")
+                        p2_bullets.append(Bullet(screen, [tanks[1].position[0], tanks[1].position[1]],
+                                                 [2 * degcos(tanks[1].angle), -2 * degsin(tanks[1].angle)]))
+                if event.key == K_o:
+                    if len(p3_bullets) < 10:
+                        print("Fire!")
+                        p2_bullets.append(Bullet(screen, [tanks[2].position[0], tanks[2].position[1]],
+                                                 [2 * degcos(tanks[2].angle), -2 * degsin(tanks[2].angle)]))
+                if event.key == K_ESCAPE:
+                    game.game = False
+        player_1_controls(tanks[0])
+        player_2_controls(tanks[1])
+        player_3_controls(tanks[2])
+        game.refresh()
+        pygame.display.update()
+        fps_clock.tick(FPS)
