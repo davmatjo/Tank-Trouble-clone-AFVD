@@ -49,7 +49,7 @@ class MainGame:
 
 
 
-FPS = 75
+FPS = 60
 fps_clock = pygame.time.Clock()
 
 
