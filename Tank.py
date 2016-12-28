@@ -7,7 +7,7 @@ from sincos import degsin
 
 
 class Tank:
-    def __init__(self, screen, position):
+    def __init__(self, screen, position, name):
         """set up initial variables"""
         self.screen = screen
         self.velocity = [0, 0]
@@ -16,6 +16,7 @@ class Tank:
         self.angle = 0
         self.image_rect = self.image.get_rect()
         self.position = position
+        self.name = name
 
 
     def set_velocity(self, velocity):

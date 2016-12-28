@@ -1,12 +1,19 @@
 import pygame
 import sys
 from pygame.locals import *
+from multiplayer import start_2_player, start_3_player
 
 pygame.init()
 window_size = (800, 800)
 
 screen = pygame.display.set_mode(window_size)
 screen.fill((255, 255, 255))
+
+try:
+    back = pygame.transform.scale(pygame.image.load("maze.png").convert(), window_size)
+    screen.blit(back, (0, 0))
+except pygame.error:
+    pass
 
 FPS = 60
 fps_clock = pygame.time.Clock()
@@ -27,9 +34,9 @@ def title_screen():
         #Rectangles
         pygame.draw.rect(screen, (31, 196, 209), (20, 20, 760, 170))
 
-        button("1 Player", 250, 300, 300, 60, print)
-        button("2 Players", 250, 400, 300, 60)
-        button("3 Players", 250, 500, 300, 60)
+        button("1 Player", 250, 300, 300, 60)
+        button("2 Players", 250, 400, 300, 60, start_2_player)
+        button("3 Players", 250, 500, 300, 60, start_3_player)
 
         #Text
         text_surf1, text_rect1 = text_objects("Armoured Fighting", pygame.font.Font('arial.ttf', 70))
@@ -49,7 +56,7 @@ def button(text, x, y, width, height, action=None):
     if x + width > mouse_pos[0] > x and y + height > mouse_pos[1] > y:
         pygame.draw.rect(screen, (120, 198, 220), (x, y, width, height))
         if click[0] == 1 and action != None:
-            action()
+            action(screen)
     else:
         pygame.draw.rect(screen, (31, 196, 209), (x, y, width, height))
 
