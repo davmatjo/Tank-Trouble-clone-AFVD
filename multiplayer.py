@@ -22,6 +22,7 @@ def player_1_controls(afv):
     if pygame.key.get_pressed()[K_w]:
         afv.forward()
 
+
 def player_2_controls(afv):
     if pygame.key.get_pressed()[K_LEFT]:
         afv.turn(2)
@@ -54,22 +55,41 @@ def start_2_player(screen):
                 tank.move()
                 tank.draw()
                 tank.velocity = [0, 0]
-            for bullet in bullets:
+            for bullet in p1_bullets:
                 bullet.move()
                 bullet.draw()
                 bullet.lifespan()
-                if not bullets[0].alive:
-                    bullets.pop(0)
+                if not p1_bullets[0].alive:
+                    p1_bullets.pop(0)
+            for bullet in p2_bullets:
+                bullet.move()
+                bullet.draw()
+                bullet.lifespan()
+                if not p2_bullets[0].alive:
+                    p2_bullets.pop(0)
+
     game = MainGame()
     game.new_maze()
     tanks = []
-    bullets = []
-    tanks.append(Tank(screen, [500, 500], "Player 1"))
-    tanks.append(Tank(screen, [250, 250], "Player 2"))
+    p1_bullets = []
+    p2_bullets = []
+    tanks.append(Tank(screen, [500, 500], "Player 1", "Assets/AFV1.png"))
+    tanks.append(Tank(screen, [270, 250], "Player 2", "Assets/AFV2.png"))
     while game.game:
         for event in pygame.event.get():
             if event.type == QUIT:
                 sys.exit()
+            if event.type == KEYDOWN:
+                if event.key == K_e:
+                    if len(p1_bullets) < 10:
+                        print("Fire!")
+                        p1_bullets.append(Bullet(screen, [tanks[0].position[0], tanks[0].position[1]], [2 * degcos(tanks[0].angle), -2 * degsin(tanks[0].angle)]))
+                if event.key == K_KP0:
+                    if len(p2_bullets) < 10:
+                        print("Fire!")
+                        p2_bullets.append(Bullet(screen, [tanks[1].position[0], tanks[1].position[1]], [2 * degcos(tanks[1].angle), -2 * degsin(tanks[1].angle)]))
+                if event.key == K_ESCAPE:
+                    game.game = False
         player_1_controls(tanks[0])
         player_2_controls(tanks[1])
         game.refresh()

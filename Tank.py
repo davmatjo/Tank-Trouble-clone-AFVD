@@ -7,11 +7,11 @@ from sincos import degsin
 
 
 class Tank:
-    def __init__(self, screen, position, name):
+    def __init__(self, screen, position, name, sprite):
         """set up initial variables"""
         self.screen = screen
         self.velocity = [0, 0]
-        self.original_image = pygame.image.load("assets/AFV1.png")
+        self.original_image = pygame.image.load(sprite)
         self.image = self.original_image
         self.angle = 0
         self.image_rect = self.image.get_rect()
@@ -30,7 +30,6 @@ class Tank:
 
     def move(self):
         center = list(self.image_rect.center)
-        print(center)
         # location = list(self.image_rect.center)
         # print(location[0], location[1])
         # location[0] += self.velocity[0]*2
@@ -84,10 +83,8 @@ class Tank:
 
 
     def forward(self):
-        print(self.angle)
         i = degcos(self.angle)
         j = degsin(self.angle)
-        print(i, -j)
         self.velocity = [i, -j]
         #self.image_rect = pygame.Rect.move(self.image_rect, i, -j)
         #self.pos[0] += i
