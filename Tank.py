@@ -84,6 +84,16 @@ class Tank:
         self.image_rect = temp_rect
 
 
+    def set_angle(self, angle):
+        self.angle = angle
+
+        temp_image = pygame.transform.rotate(self.original_image, self.angle)
+        temp_rect = temp_image.get_rect()
+        temp_rect.center = self.image_rect.center
+        self.image = temp_image
+        self.image_rect = temp_rect
+
+
     def forward(self):
         i = degcos(self.angle)
         j = degsin(self.angle)

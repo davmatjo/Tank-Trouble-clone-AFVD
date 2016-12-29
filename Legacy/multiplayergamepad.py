@@ -14,7 +14,8 @@ FPS = 60
 fps_clock = pygame.time.Clock()
 
 
-def controller_movement(afv, player):
+# Controls are seperate so they can be shared between modes
+def player_movement(afv, player):
     x_vel = player.get_axis(0)
     y_vel = player.get_axis(1)
     # deadzone allowance
@@ -32,23 +33,7 @@ def controller_movement(afv, player):
 
 
 
-# Controls are seperate so they can be shared between modes
-def player_1_movement(afv, game):
-    if pygame.key.get_pressed()[K_a]:
-        afv.turn(2)
-    if pygame.key.get_pressed()[K_s]:
-        afv.backward()
-    if pygame.key.get_pressed()[K_d]:
-        afv.turn(-2)
-    if pygame.key.get_pressed()[K_w]:
-        afv.forward()
-    try:
-        controller_movement(afv, game.p1)
-    except:
-        pass
-
-
-def player_2_movement(afv, game):
+def player_2_movement(afv):
     if pygame.key.get_pressed()[K_LEFT]:
         afv.turn(2)
     if pygame.key.get_pressed()[K_DOWN]:
@@ -57,13 +42,8 @@ def player_2_movement(afv, game):
         afv.turn(-2)
     if pygame.key.get_pressed()[K_UP]:
         afv.forward()
-    try:
-        controller_movement(afv, game.p2)
-    except:
-        pass
 
-
-def player_3_movement(afv, game):
+def player_3_movement(afv):
     if pygame.key.get_pressed()[K_j]:
         afv.turn(2)
     if pygame.key.get_pressed()[K_k]:
@@ -72,10 +52,6 @@ def player_3_movement(afv, game):
         afv.turn(-2)
     if pygame.key.get_pressed()[K_i]:
         afv.forward()
-    try:
-        controller_movement(afv, game.p3)
-    except:
-        pass
 
 
 def get_spawnpoints(maze_size, player_count):
@@ -111,17 +87,10 @@ def start_2_player(screen):
             self.tanks = []
             self.create_players()
             pygame.joystick.init()
-            try:
-                self.p1 = pygame.joystick.Joystick(0)
-                self.p1.init()
-            except:
-                pass
-            try:
-                self.p2 = pygame.joystick.Joystick(1)
-                self.p2.init()
-            except:
-                pass
-
+            self.p1 = pygame.joystick.Joystick(0)
+            self.p2 = pygame.joystick.Joystick(1)
+            self.p2.init()
+            self.p1.init()
 
         def new_maze(self):
             my_maze = Maze(self.maze_size)
@@ -149,8 +118,8 @@ def start_2_player(screen):
                 if not self.tanks[1].fired_bullets[0].alive:
                     self.tanks[1].fired_bullets.pop(0)
             self.handle_inputs()
-            player_1_movement(self.tanks[0], game)
-            player_2_movement(self.tanks[1], game)
+            player_movement(self.tanks[0], self.p1)
+            player_movement(self.tanks[1], self.p2)
 
         def handle_inputs(self):
             """
@@ -160,23 +129,6 @@ def start_2_player(screen):
             for event in pygame.event.get():
                 if event.type == QUIT:
                     sys.exit()
-
-                if event.type == KEYDOWN:
-                    if event.key == K_e:
-                        if len(self.tanks[0].fired_bullets) < 10:
-                            print("Fire!")
-                            self.tanks[0].fired_bullets.append(Bullet(screen, [self.tanks[0].position[0], self.tanks[0].position[1]],
-                                                                      [2 * degcos(self.tanks[0].angle), -2 * degsin(
-                                                                     self.tanks[0].angle)]))
-                    if event.key == K_KP0:
-                        if len(self.tanks[1].fired_bullets) < 10:
-                            print("Fire!")
-                            self.tanks[1].fired_bullets.append(Bullet(screen, [self.tanks[1].position[0], self.tanks[1].position[1]],
-                                                                      [2 * degcos(self.tanks[1].angle), -2 * degsin(
-                                                                     self.tanks[1].angle)]))
-                    if event.key == K_ESCAPE:
-                        game.game = False
-
                 if event.type == JOYBUTTONDOWN:
                     if event.button == 0 and event.joy == 0:
                         if len(self.tanks[0].fired_bullets) < 10:
@@ -190,6 +142,10 @@ def start_2_player(screen):
                             self.tanks[1].fired_bullets.append(Bullet(screen, [self.tanks[1].position[0], self.tanks[1].position[1]],
                                                                       [2 * degcos(self.tanks[1].angle), -2 * degsin(
                                                                      self.tanks[1].angle)]))
+                if event.type == KEYDOWN:
+
+                    if event.key == K_ESCAPE:
+                        game.game = False
 
         def create_players(self):
             tank_positions = get_spawnpoints(self.maze_size, 2)
@@ -217,21 +173,13 @@ def start_3_player(screen):
             self.new_maze()
             self.tanks = []
             self.create_players()
-            try:
-                self.p1 = pygame.joystick.Joystick(0)
-                self.p1.init()
-            except:
-                pass
-            try:
-                self.p2 = pygame.joystick.Joystick(1)
-                self.p2.init()
-            except:
-                pass
-            try:
-                self.p3 = pygame.joystick.Joystick(2)
-                self.p3.init()
-            except:
-                pass
+            self.p1 = pygame.joystick.Joystick(0)
+            self.p2 = pygame.joystick.Joystick(1)
+            self.p3 = pygame.joystick.Joystick(2)
+            self.p1.init()
+            self.p2.init()
+            self.p3.init()
+
 
         def new_maze(self):
             my_maze = Maze(self.maze_size)
@@ -271,9 +219,9 @@ def start_3_player(screen):
             Input handler for all players
             :return:
             """
-            player_1_movement(self.tanks[0], game)
-            player_2_movement(self.tanks[1], game)
-            player_3_movement(self.tanks[2], game)
+            player_movement(self.tanks[0], self.p1)
+            player_movement(self.tanks[1], self.p2)
+            player_movement(self.tanks[2], self.p3)
             for event in pygame.event.get():
                 if event.type == QUIT:
                     sys.exit()
@@ -298,27 +246,6 @@ def start_3_player(screen):
                                                                      self.tanks[2].angle)]))
                     if event.key == K_ESCAPE:
                         game.game = False
-
-                if event.type == JOYBUTTONDOWN:
-                    if event.button == 0 and event.joy == 0:
-                        if len(self.tanks[0].fired_bullets) < 10:
-                            print("Fire!")
-                            self.tanks[0].fired_bullets.append(Bullet(screen, [self.tanks[0].position[0], self.tanks[0].position[1]],
-                                                                      [2 * degcos(self.tanks[0].angle), -2 * degsin(
-                                                                     self.tanks[0].angle)]))
-                    if event.button == 0 and event.joy == 1:
-                        if len(self.tanks[1].fired_bullets) < 10:
-                            print("Fire!")
-                            self.tanks[1].fired_bullets.append(Bullet(screen, [self.tanks[1].position[0], self.tanks[1].position[1]],
-                                                                      [2 * degcos(self.tanks[1].angle), -2 * degsin(
-                                                                     self.tanks[1].angle)]))
-                    if event.button == 0 and event.joy == 2:
-                        if len(self.tanks[1].fired_bullets) < 10:
-                            print("Fire!")
-                            self.tanks[2].fired_bullets.append(
-                                Bullet(screen, [self.tanks[2].position[0], self.tanks[2].position[1]],
-                                       [2 * degcos(self.tanks[2].angle), -2 * degsin(
-                                           self.tanks[2].angle)]))
 
         def create_players(self):
             tank_positions = get_spawnpoints(self.maze_size, 3)
