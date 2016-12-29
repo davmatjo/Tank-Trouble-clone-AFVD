@@ -14,7 +14,7 @@ try:
     screen.blit(back, (0, 0))
 except pygame.error:
     pass
-
+help_image = pygame.transform.scale(pygame.image.load("help.png").convert(), window_size)
 FPS = 60
 fps_clock = pygame.time.Clock()
 
@@ -71,12 +71,27 @@ def text_objects(text, font):
     return textSurface, textSurface.get_rect()
 
 
-def help_screen():
+def help_screen(screen):
     help_on = True
     while help_on:
-        screen.blit(pygame.image.load("help.png", (0, 0)).convert())
-        if pygame.key.get_pressed()[K_ESCAPE]:
-            help_on = False
+        screen.blit(help_image, (0, 0))
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+            if event.type == KEYDOWN:
+                if event.key == K_ESCAPE:
+                    help_on = False
+
+        pygame.display.update()
+        fps_clock.tick(FPS)
+    try:
+        back = pygame.transform.scale(pygame.image.load("maze.png").convert(), window_size)
+        screen.blit(back, (0, 0))
+    except pygame.error:
+        pass
+
+
 
 
 
