@@ -17,6 +17,8 @@ class Tank:
         self.image_rect = self.image.get_rect()
         self.position = position
         self.name = name
+        self.powerups = 0
+        self.fired_bullets = []
 
 
     def set_velocity(self, velocity):

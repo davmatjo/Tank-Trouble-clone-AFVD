@@ -66,18 +66,18 @@ def start_2_player(screen):
                 tank.move()
                 tank.draw()
                 tank.velocity = [0, 0]
-            for bullet in p1_bullets:
+            for bullet in tanks[0].fired_bullets:
                 bullet.move()
                 bullet.draw()
                 bullet.lifespan()
-                if not p1_bullets[0].alive:
-                    p1_bullets.pop(0)
-            for bullet in p2_bullets:
+                if not tanks[0].fired_bullets[0].alive:
+                    tanks[0].fired_bullets.pop(0)
+            for bullet in tanks[1].fired_bullets:
                 bullet.move()
                 bullet.draw()
                 bullet.lifespan()
-                if not p2_bullets[0].alive:
-                    p2_bullets.pop(0)
+                if not tanks[1].fired_bullets[0].alive:
+                    tanks[1].fired_bullets.pop(0)
 
         def handle_inputs(self):
             """
@@ -89,14 +89,14 @@ def start_2_player(screen):
                     sys.exit()
                 if event.type == KEYDOWN:
                     if event.key == K_e:
-                        if len(p1_bullets) < 10:
+                        if len(tanks[0].fired_bullets) < 10:
                             print("Fire!")
-                            p1_bullets.append(Bullet(screen, [tanks[0].position[0], tanks[0].position[1]],
+                            tanks[0].fired_bullets.append(Bullet(screen, [tanks[0].position[0], tanks[0].position[1]],
                                                      [2 * degcos(tanks[0].angle), -2 * degsin(tanks[0].angle)]))
                     if event.key == K_KP0:
-                        if len(p2_bullets) < 10:
+                        if len(tanks[1].fired_bullets) < 10:
                             print("Fire!")
-                            p2_bullets.append(Bullet(screen, [tanks[1].position[0], tanks[1].position[1]],
+                            tanks[1].fired_bullets.append(Bullet(screen, [tanks[1].position[0], tanks[1].position[1]],
                                                      [2 * degcos(tanks[1].angle), -2 * degsin(tanks[1].angle)]))
                     if event.key == K_ESCAPE:
                         game.game = False
@@ -106,8 +106,6 @@ def start_2_player(screen):
     game = MainGame()
     game.new_maze()
     tanks = []
-    p1_bullets = []
-    p2_bullets = []
     tanks.append(Tank(screen, [500, 500], "Player 1", "Assets/AFV1.png"))
     tanks.append(Tank(screen, [270, 250], "Player 2", "Assets/AFV2.png"))
     # main game loop
@@ -142,24 +140,24 @@ def start_3_player(screen):
                 tank.move()
                 tank.draw()
                 tank.velocity = [0, 0]
-            for bullet in p1_bullets:
+            for bullet in tanks[0].fired_bullets:
                 bullet.move()
                 bullet.draw()
                 bullet.lifespan()
-                if not p1_bullets[0].alive:
-                    p1_bullets.pop(0)
-            for bullet in p2_bullets:
+                if not tanks[0].fired_bullets[0].alive:
+                    tanks[0].fired_bullets.pop(0)
+            for bullet in tanks[1].fired_bullets:
                 bullet.move()
                 bullet.draw()
                 bullet.lifespan()
-                if not p2_bullets[0].alive:
-                    p2_bullets.pop(0)
-            for bullet in p3_bullets:
+                if not tanks[1].fired_bullets[0].alive:
+                    tanks[1].fired_bullets.pop(0)
+            for bullet in tanks[2].fired_bullets:
                 bullet.move()
                 bullet.draw()
                 bullet.lifespan()
-                if not p3_bullets[0].alive:
-                    p3_bullets.pop(0)
+                if not tanks[2].fired_bullets[0].alive:
+                    tanks[2].fired_bullets.pop(0)
 
         def handle_inputs(self):
             """
@@ -171,19 +169,19 @@ def start_3_player(screen):
                     sys.exit()
                 if event.type == KEYDOWN:
                     if event.key == K_e:
-                        if len(p1_bullets) < 10:
+                        if len(tanks[0].fired_bullets) < 10:
                             print("Fire!")
-                            p1_bullets.append(Bullet(screen, [tanks[0].position[0], tanks[0].position[1]],
+                            tanks[0].fired_bullets.append(Bullet(screen, [tanks[0].position[0], tanks[0].position[1]],
                                                      [2 * degcos(tanks[0].angle), -2 * degsin(tanks[0].angle)]))
                     if event.key == K_KP0:
-                        if len(p2_bullets) < 10:
+                        if len(tanks[1].fired_bullets) < 10:
                             print("Fire!")
-                            p2_bullets.append(Bullet(screen, [tanks[1].position[0], tanks[1].position[1]],
+                            tanks[1].fired_bullets.append(Bullet(screen, [tanks[1].position[0], tanks[1].position[1]],
                                                      [2 * degcos(tanks[1].angle), -2 * degsin(tanks[1].angle)]))
                     if event.key == K_o:
-                        if len(p3_bullets) < 10:
+                        if len(tanks[2].fired_bullets) < 10:
                             print("Fire!")
-                            p2_bullets.append(Bullet(screen, [tanks[2].position[0], tanks[2].position[1]],
+                            tanks[2].fired_bullets.append(Bullet(screen, [tanks[2].position[0], tanks[2].position[1]],
                                                      [2 * degcos(tanks[2].angle), -2 * degsin(tanks[2].angle)]))
                     if event.key == K_ESCAPE:
                         game.game = False
@@ -191,9 +189,6 @@ def start_3_player(screen):
     game = MainGame()
     game.new_maze()
     tanks = []
-    p1_bullets = []
-    p2_bullets = []
-    p3_bullets = []
     tanks.append(Tank(screen, [550, 550], "Player 1", "Assets/AFV1.png"))
     tanks.append(Tank(screen, [270, 250], "Player 2", "Assets/AFV2.png"))
     tanks.append(Tank(screen, [100, 750], "Player 3", "Assets/AFV1.png"))
