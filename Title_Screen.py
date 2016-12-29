@@ -9,16 +9,18 @@ window_size = (800, 800)
 screen = pygame.display.set_mode(window_size)
 screen.fill((255, 255, 255))
 
+# The try clause exists to prevent a crash incase the maze image is missing
 try:
     back = pygame.transform.scale(pygame.image.load("maze.png").convert(), window_size)
     screen.blit(back, (0, 0))
 except pygame.error:
     pass
+
+# Loading the help screen into memory pre-game
 help_image = pygame.transform.scale(pygame.image.load("help.png").convert(), window_size)
+
 FPS = 60
 fps_clock = pygame.time.Clock()
-
-
 
 
 def title_screen():
@@ -31,7 +33,7 @@ def title_screen():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 quit()
-        #Rectangles
+        # Draw rectangles and buttons each refresh
         pygame.draw.rect(screen, (31, 196, 209), (20, 20, 760, 170))
 
         button("1 Player", 250, 300, 300, 60)
@@ -39,7 +41,7 @@ def title_screen():
         button("3 Players", 250, 500, 300, 60, start_3_player)
         button("Help", 680, 720, 100, 60, help_screen)
 
-        #Text
+        # Draw extra text each refresh
         text_surf1, text_rect1 = text_objects("Armoured Fighting", pygame.font.SysFont('comicsansms', 70))
         text_rect1.center = ((400, 60))
         text_surf2, text_rect2 = text_objects("Vehicle Dissatisfaction", pygame.font.SysFont('comicsansms', 70))
@@ -52,6 +54,16 @@ def title_screen():
 
 
 def button(text, x, y, width, height, action=None):
+    """
+    Function that allows creation of buttons with text in more easily
+    :param text: text to go in the button
+    :param x: x co-ordinate of the left side of the button
+    :param y: y co-ordinate (from the top) of the to side of the button
+    :param width: self-explanatory
+    :param height: self-explanatory
+    :param action: pass function in for button to run when clicked
+    :return: nil
+    """
     mouse_pos = pygame.mouse.get_pos()
     click = pygame.mouse.get_pressed()
     if x + width > mouse_pos[0] > x and y + height > mouse_pos[1] > y:
@@ -67,6 +79,11 @@ def button(text, x, y, width, height, action=None):
 
 
 def text_objects(text, font):
+    """
+    :param text: text to be written to surface
+    :param font: font
+    :return: text surface ready for blitting onto screen, along with co-ordinates of rectangle boundaries
+    """
     textSurface = font.render(text, True, (0, 0, 0))
     return textSurface, textSurface.get_rect()
 
@@ -90,9 +107,5 @@ def help_screen(screen):
         screen.blit(back, (0, 0))
     except pygame.error:
         pass
-
-
-
-
 
 title_screen()
