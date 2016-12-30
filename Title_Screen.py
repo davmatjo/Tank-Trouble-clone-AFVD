@@ -19,7 +19,7 @@ except pygame.error:
 # Loading the help screen into memory pre-game
 help_image = pygame.transform.scale(pygame.image.load("help.png").convert(), window_size)
 
-FPS = 60
+FPS = 15
 fps_clock = pygame.time.Clock()
 
 
@@ -27,8 +27,6 @@ def title_screen():
     titlescreen = True
     while titlescreen:
         pygame.display.set_caption("AFVD")
-
-        mouse_pos = pygame.mouse.get_pos()
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
