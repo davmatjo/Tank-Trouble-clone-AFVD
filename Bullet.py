@@ -124,8 +124,6 @@ class Shrapnel:
     def move(self):
         self.position[0] += self.velocity[0]
         self.position[1] += self.velocity[1]
-        print("moving")
-        print(self.position)
         if self.position[0] < 0 or self.position[0] > 800:
             self.velocity[0] *= 0
         if self.position[1] < 0 or self.position[1] > 800:
@@ -149,5 +147,4 @@ class Shrapnel:
 
     def draw(self):
         self.circle = pygame.draw.circle(self.screen, (200, 0, 1), (int(self.position[0]), int(self.position[1])), 2)
-        print("drawing")
 

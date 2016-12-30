@@ -119,11 +119,10 @@ def decay_and_collision_handler(t_id, bullet, tank):
 def shrapnel_handler(bullet, tank):
     if not bullet.alive:
         special_bullets.pop(0)
-    if bullet.lifetime > 10:
-        for u_id in range(len(tank)):
-            if tank[u_id].image_rect.colliderect(bullet.circle) and bullet.type == 0:
-                bullet.alive = False
-                tank[u_id].alive = False
+    for u_id in range(len(tank)):
+        if tank[u_id].image_rect.colliderect(bullet.circle) and bullet.type == 0:
+            bullet.alive = False
+            tank[u_id].alive = False
 
 
 
