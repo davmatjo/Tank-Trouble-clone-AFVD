@@ -34,14 +34,15 @@ def controller_movement(afv, player):
 
 # Controls are seperate so they can be shared between modes
 def player_1_movement(afv, game):
-    if pygame.key.get_pressed()[K_a]:
-        afv.turn(2)
-    if pygame.key.get_pressed()[K_s]:
-        afv.backward()
-    if pygame.key.get_pressed()[K_d]:
-        afv.turn(-2)
-    if pygame.key.get_pressed()[K_w]:
-        afv.forward()
+    if afv.alive:
+        if pygame.key.get_pressed()[K_a]:
+            afv.turn(2)
+        if pygame.key.get_pressed()[K_s]:
+            afv.backward()
+        if pygame.key.get_pressed()[K_d]:
+            afv.turn(-2)
+        if pygame.key.get_pressed()[K_w]:
+            afv.forward()
     try:
         controller_movement(afv, game.p1)
     except:
@@ -49,14 +50,15 @@ def player_1_movement(afv, game):
 
 
 def player_2_movement(afv, game):
-    if pygame.key.get_pressed()[K_LEFT]:
-        afv.turn(2)
-    if pygame.key.get_pressed()[K_DOWN]:
-        afv.backward()
-    if pygame.key.get_pressed()[K_RIGHT]:
-        afv.turn(-2)
-    if pygame.key.get_pressed()[K_UP]:
-        afv.forward()
+    if afv.alive:
+        if pygame.key.get_pressed()[K_LEFT]:
+            afv.turn(2)
+        if pygame.key.get_pressed()[K_DOWN]:
+            afv.backward()
+        if pygame.key.get_pressed()[K_RIGHT]:
+            afv.turn(-2)
+        if pygame.key.get_pressed()[K_UP]:
+            afv.forward()
     try:
         controller_movement(afv, game.p2)
     except:
@@ -64,14 +66,15 @@ def player_2_movement(afv, game):
 
 
 def player_3_movement(afv, game):
-    if pygame.key.get_pressed()[K_j]:
-        afv.turn(2)
-    if pygame.key.get_pressed()[K_k]:
-        afv.backward()
-    if pygame.key.get_pressed()[K_l]:
-        afv.turn(-2)
-    if pygame.key.get_pressed()[K_i]:
-        afv.forward()
+    if afv.alive:
+        if pygame.key.get_pressed()[K_j]:
+            afv.turn(2)
+        if pygame.key.get_pressed()[K_k]:
+            afv.backward()
+        if pygame.key.get_pressed()[K_l]:
+            afv.turn(-2)
+        if pygame.key.get_pressed()[K_i]:
+            afv.forward()
     try:
         controller_movement(afv, game.p3)
     except:
@@ -98,6 +101,26 @@ def get_spawnpoints(maze_size, player_count):
         print(tank_coordinates)
         tank_positions.append(tank_coordinates)
     return tank_positions
+
+
+def decay_and_collision_handler(t_id, bullet, tank):
+    if not tank[t_id].fired_bullets[0].alive:
+        tank[t_id].fired_bullets.pop(0)
+    if bullet.lifetime > 10:
+        for u_id in range(len(tank)):
+            if tank[u_id].image_rect.colliderect(bullet.circle):
+                bullet.alive = False
+                tank[u_id].alive = False
+
+
+
+def fire(t_id, tanks, screen):
+    if len(tanks[t_id].fired_bullets) < 10:
+        print("Fire!")
+        b_velocity = [2 * degcos(tanks[t_id].angle), -2 * degsin(tanks[t_id].angle)]
+        tanks[t_id].fired_bullets.append(Bullet(screen, [tanks[t_id].position[0] + b_velocity[0] * 18,
+                                                              tanks[t_id].position[1] + b_velocity[1] * 18],
+                                                     b_velocity))
 
 
 def start_2_player(screen):
@@ -136,17 +159,19 @@ def start_2_player(screen):
                 if tank.alive:
                     tank.move()
                     tank.draw()
-                    tank.velocity = [0, 0]
+                else:
+                    tank.dead()
+                tank.velocity = [0, 0]
             for bullet in self.tanks[0].fired_bullets:
                 bullet.move()
                 bullet.draw()
                 bullet.lifespan()
-                self.decay_and_collision_handler(0, bullet)
+                decay_and_collision_handler(0, bullet, self.tanks)
             for bullet in self.tanks[1].fired_bullets:
                 bullet.move()
                 bullet.draw()
                 bullet.lifespan()
-                self.decay_and_collision_handler(1, bullet)
+                decay_and_collision_handler(1, bullet, self.tanks)
             self.handle_inputs()
             player_1_movement(self.tanks[0], game)
             player_2_movement(self.tanks[1], game)
@@ -162,39 +187,24 @@ def start_2_player(screen):
 
                 if event.type == KEYDOWN:
                     if event.key == K_e and self.tanks[0].alive:
-                        self.fire(0)
+                        fire(0, self.tanks, screen)
                     if event.key == K_KP0 and self.tanks[1].alive:
-                        self.fire(1)
+                        fire(1, self.tanks, screen)
                     if event.key == K_ESCAPE:
                         game.game = False
 
                 if event.type == JOYBUTTONDOWN:
                     if event.button == 0 and event.joy == 0 and self.tanks[0].alive:
-                        self.fire(0)
+                        fire(0, self.tanks, screen)
                     if event.button == 0 and event.joy == 1 and self.tanks[1].alive:
-                        self.fire(1)
+                        fire(1, self.tanks, screen)
 
-        def fire(self, t_id):
-            if len(self.tanks[t_id].fired_bullets) < 10:
-                print("Fire!")
-                b_velocity = [2 * degcos(self.tanks[t_id].angle), -2 * degsin(self.tanks[t_id].angle)]
-                self.tanks[t_id].fired_bullets.append(Bullet(screen, [self.tanks[t_id].position[0] + b_velocity[0] * 18,self.tanks[t_id].position[1] + b_velocity[1] * 18], b_velocity))
 
         def create_players(self):
             tank_positions = get_spawnpoints(self.maze_size, 2)
             self.tanks.append(Tank(screen, tank_positions[0], "Player 1", "Assets/AFV1.png"))
             self.tanks.append(Tank(screen, tank_positions[1], "Player 2", "Assets/AFV1.png"))
 
-        def decay_and_collision_handler(self, t_id, bullet):
-            if not self.tanks[t_id].fired_bullets[0].alive:
-                self.tanks[t_id].fired_bullets.pop(0)
-            if bullet.lifetime > 10:
-                if self.tanks[0].image_rect.colliderect(bullet.circle):
-                    bullet.alive = False
-                    self.tanks[0].alive = False
-                if self.tanks[1].image_rect.colliderect(bullet.circle):
-                    bullet.alive = False
-                    self.tanks[1].alive = False
 
 
 
@@ -244,27 +254,27 @@ def start_3_player(screen):
         def refresh(self):
             screen.blit(self.background, (0, 0))
             for tank in self.tanks:
-                tank.move()
-                tank.draw()
+                if tank.alive:
+                    tank.move()
+                    tank.draw()
+                else:
+                    tank.dead()
                 tank.velocity = [0, 0]
             for bullet in self.tanks[0].fired_bullets:
                 bullet.move()
                 bullet.draw()
                 bullet.lifespan()
-                if not self.tanks[0].fired_bullets[0].alive:
-                    self.tanks[0].fired_bullets.pop(0)
+                decay_and_collision_handler(0, bullet, self.tanks)
             for bullet in self.tanks[1].fired_bullets:
                 bullet.move()
                 bullet.draw()
                 bullet.lifespan()
-                if not self.tanks[1].fired_bullets[0].alive:
-                    self.tanks[1].fired_bullets.pop(0)
+                decay_and_collision_handler(1, bullet, self.tanks)
             for bullet in self.tanks[2].fired_bullets:
                 bullet.move()
                 bullet.draw()
                 bullet.lifespan()
-                if not self.tanks[2].fired_bullets[0].alive:
-                    self.tanks[2].fired_bullets.pop(0)
+                decay_and_collision_handler(2, bullet, self.tanks)
             self.handle_inputs()
 
         def handle_inputs(self):
@@ -280,46 +290,21 @@ def start_3_player(screen):
                     sys.exit()
                 if event.type == KEYDOWN:
                     if event.key == K_e:
-                        if len(self.tanks[0].fired_bullets) < 10:
-                            print("Fire!")
-                            self.tanks[0].fired_bullets.append(Bullet(screen, [self.tanks[0].position[0], self.tanks[0].position[1]],
-                                                                      [2 * degcos(self.tanks[0].angle), -2 * degsin(
-                                                                     self.tanks[0].angle)]))
+                        fire(0, self.tanks, screen)
                     if event.key == K_KP0:
-                        if len(self.tanks[1].fired_bullets) < 10:
-                            print("Fire!")
-                            self.tanks[1].fired_bullets.append(Bullet(screen, [self.tanks[1].position[0], self.tanks[1].position[1]],
-                                                                      [2 * degcos(self.tanks[1].angle), -2 * degsin(
-                                                                     self.tanks[1].angle)]))
+                        fire(1, self.tanks, screen)
                     if event.key == K_o:
-                        if len(self.tanks[2].fired_bullets) < 10:
-                            print("Fire!")
-                            self.tanks[2].fired_bullets.append(Bullet(screen, [self.tanks[2].position[0], self.tanks[2].position[1]],
-                                                                      [2 * degcos(self.tanks[2].angle), -2 * degsin(
-                                                                     self.tanks[2].angle)]))
+                        fire(2, self.tanks, screen)
                     if event.key == K_ESCAPE:
                         game.game = False
 
                 if event.type == JOYBUTTONDOWN:
                     if event.button == 0 and event.joy == 0:
-                        if len(self.tanks[0].fired_bullets) < 10:
-                            print("Fire!")
-                            self.tanks[0].fired_bullets.append(Bullet(screen, [self.tanks[0].position[0], self.tanks[0].position[1]],
-                                                                      [2 * degcos(self.tanks[0].angle), -2 * degsin(
-                                                                     self.tanks[0].angle)]))
+                        fire(0, self.tanks, screen)
                     if event.button == 0 and event.joy == 1:
-                        if len(self.tanks[1].fired_bullets) < 10:
-                            print("Fire!")
-                            self.tanks[1].fired_bullets.append(Bullet(screen, [self.tanks[1].position[0], self.tanks[1].position[1]],
-                                                                      [2 * degcos(self.tanks[1].angle), -2 * degsin(
-                                                                     self.tanks[1].angle)]))
+                        fire(1, self.tanks, screen)
                     if event.button == 0 and event.joy == 2:
-                        if len(self.tanks[1].fired_bullets) < 10:
-                            print("Fire!")
-                            self.tanks[2].fired_bullets.append(
-                                Bullet(screen, [self.tanks[2].position[0], self.tanks[2].position[1]],
-                                       [2 * degcos(self.tanks[2].angle), -2 * degsin(
-                                           self.tanks[2].angle)]))
+                        fire(2, self.tanks, screen)
 
         def create_players(self):
             tank_positions = get_spawnpoints(self.maze_size, 3)

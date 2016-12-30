@@ -13,6 +13,8 @@ class Tank:
         self.velocity = [0, 0]
         self.original_image = pygame.image.load(sprite)
         self.image = self.original_image
+        self.death_image = pygame.image.load("Assets/dead.png")
+        self.dead_count = 0
         self.angle = 0
         self.image_rect = self.image.get_rect()
         self.position = position
@@ -116,3 +118,9 @@ class Tank:
     def draw(self):
         self.image_rect.center = (int(self.position[0]), int(self.position[1]))
         self.screen.blit(self.image, self.image_rect)
+
+    def dead(self):
+        self.original_image = self.death_image
+        self.turn(0)
+        self.draw()
+
