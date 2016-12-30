@@ -19,6 +19,7 @@ class Tank:
         self.name = name
         self.powerups = 0
         self.fired_bullets = []
+        self.alive = True
 
 
     def set_velocity(self, velocity):

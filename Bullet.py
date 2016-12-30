@@ -9,7 +9,7 @@ class Bullet:
         self.screen = screen
         self.position = position
         self.velocity = velocity
-        self.image = pygame.image.load("assets/ball.png")
+        self.circle = pygame.draw.circle(screen, (0, 0, 0), (int(position[0]), int(position[1])), 4)
         self.alive = True
         self.lifetime = 0
 
@@ -29,13 +29,13 @@ class Bullet:
             self.velocity[0] *= -1
         if self.position[1] < 0 or self.position[1] > 800:
             self.velocity[1] *= -1
-        if self.screen.get_at((int(self.position[0] + 6), int(self.position[1] + 3))) == (0, 0, 0, 255):
+        if self.screen.get_at((int(self.position[0] + 4), int(self.position[1]))) == (0, 0, 0, 255):
             self.velocity[0] *= -1
-        if self.screen.get_at((int(self.position[0] + 3), int(self.position[1] + 6))) == (0, 0, 0, 255):
+        if self.screen.get_at((int(self.position[0]), int(self.position[1] + 4))) == (0, 0, 0, 255):
             self.velocity[1] *= -1
-        if self.screen.get_at((int(self.position[0] + 3), int(self.position[1]))) == (0, 0, 0, 255):
+        if self.screen.get_at((int(self.position[0]), int(self.position[1] - 4))) == (0, 0, 0, 255):
             self.velocity[1] *= -1
-        if self.screen.get_at((int(self.position[0]), int(self.position[1] + 3))) == (0, 0, 0, 255):
+        if self.screen.get_at((int(self.position[0] - 4), int(self.position[1]))) == (0, 0, 0, 255):
             self.velocity[0] *= -1
 
     def lifespan(self):
@@ -44,4 +44,4 @@ class Bullet:
             self.alive = False
 
     def draw(self):
-        self.screen.blit(self.image, (self.position[0], self.position[1]))
+        self.circle = pygame.draw.circle(self.screen, (0, 0, 0), (int(self.position[0]), int(self.position[1])), 4)
