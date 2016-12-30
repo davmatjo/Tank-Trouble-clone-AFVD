@@ -3,6 +3,7 @@ import sys
 from maze import Maze
 from pygame.locals import *
 from Bullet import Bullet
+from Bullet import Mortar
 from Tank import Tank
 from sincos import degcos
 from sincos import degsin
@@ -13,6 +14,7 @@ window_size = (800, 800)
 FPS = 60
 fps_clock = pygame.time.Clock()
 scores = [0, 0, 0]
+special_bullets = []
 
 
 def controller_movement(afv, player):
@@ -109,7 +111,17 @@ def decay_and_collision_handler(t_id, bullet, tank):
         tank[t_id].fired_bullets.pop(0)
     if bullet.lifetime > 10:
         for u_id in range(len(tank)):
-            if tank[u_id].image_rect.colliderect(bullet.circle):
+            if tank[u_id].image_rect.colliderect(bullet.circle) and bullet.type == 0:
+                bullet.alive = False
+                tank[u_id].alive = False
+
+
+def shrapnel_handler(bullet, tank):
+    if not bullet.alive:
+        special_bullets.pop(0)
+    if bullet.lifetime > 10:
+        for u_id in range(len(tank)):
+            if tank[u_id].image_rect.colliderect(bullet.circle) and bullet.type == 0:
                 bullet.alive = False
                 tank[u_id].alive = False
 
@@ -117,11 +129,17 @@ def decay_and_collision_handler(t_id, bullet, tank):
 
 def fire(t_id, tanks, screen):
     if len(tanks[t_id].fired_bullets) < 10:
-        print("Fire!")
-        b_velocity = [2 * degcos(tanks[t_id].angle), -2 * degsin(tanks[t_id].angle)]
-        tanks[t_id].fired_bullets.append(Bullet(screen, [tanks[t_id].position[0] + b_velocity[0] * 18,
-                                                              tanks[t_id].position[1] + b_velocity[1] * 18],
-                                                     b_velocity))
+        if tanks[t_id].powerups == 1:
+            b_velocity = [degcos(tanks[t_id].angle), -degsin(tanks[t_id].angle)]
+            tanks[t_id].fired_bullets.append(Mortar(screen, [tanks[t_id].position[0] + b_velocity[0] * 18,
+                                                             tanks[t_id].position[1] + b_velocity[1] * 18],
+                                                    b_velocity, special_bullets))
+            tanks[t_id].powerups = 0
+        else:
+            b_velocity = [2 * degcos(tanks[t_id].angle), -2 * degsin(tanks[t_id].angle)]
+            tanks[t_id].fired_bullets.append(Bullet(screen, [tanks[t_id].position[0] + b_velocity[0] * 18,
+                                                                  tanks[t_id].position[1] + b_velocity[1] * 18],
+                                                         b_velocity))
 
 
 def start_2_player(screen):
@@ -174,6 +192,11 @@ def start_2_player(screen):
                 bullet.draw()
                 bullet.lifespan()
                 decay_and_collision_handler(1, bullet, self.tanks)
+            for bullet in special_bullets:
+                bullet.move()
+                bullet.draw()
+                bullet.lifespan()
+                shrapnel_handler(bullet, self.tanks)
             self.handle_inputs()
             player_1_movement(self.tanks[0], game)
             player_2_movement(self.tanks[1], game)
@@ -301,6 +324,11 @@ def start_3_player(screen):
                 bullet.draw()
                 bullet.lifespan()
                 decay_and_collision_handler(2, bullet, self.tanks)
+            for bullet in special_bullets:
+                bullet.move()
+                bullet.draw()
+                bullet.lifespan()
+                shrapnel_handler(bullet, self.tanks)
             self.handle_inputs()
             self.game_end_check()
 
