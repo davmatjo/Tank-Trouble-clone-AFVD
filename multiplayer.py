@@ -12,6 +12,7 @@ from random import randrange
 window_size = (800, 800)
 FPS = 60
 fps_clock = pygame.time.Clock()
+scores = [0, 0, 0]
 
 
 def controller_movement(afv, player):
@@ -133,6 +134,7 @@ def start_2_player(screen):
             self.new_maze()
             self.tanks = []
             self.create_players()
+            self.end_timer = 0
             pygame.joystick.init()
             try:
                 self.p1 = pygame.joystick.Joystick(0)
@@ -175,6 +177,7 @@ def start_2_player(screen):
             self.handle_inputs()
             player_1_movement(self.tanks[0], game)
             player_2_movement(self.tanks[1], game)
+            self.game_end_check()
 
         def handle_inputs(self):
             """
@@ -198,6 +201,28 @@ def start_2_player(screen):
                         fire(0, self.tanks, screen)
                     if event.button == 0 and event.joy == 1 and self.tanks[1].alive:
                         fire(1, self.tanks, screen)
+
+
+        def game_end_check(self):
+            if not (self.tanks[0].alive and self.tanks[1].alive):
+                self.end_timer += 1
+                if self.end_timer >= 350:
+                    if not self.tanks[0].alive and not self.tanks[1].alive:
+                        self.game = False
+                        start_2_player(screen)
+                    elif not self.tanks[1].alive:
+                        self.update_score(0)
+                        self.game = False
+                        start_2_player(screen)
+                    elif not self.tanks[0].alive:
+                        self.update_score(1)
+                        self.game = False
+                        start_2_player(screen)
+
+        def update_score(self, winner):
+            scores[winner] += 1
+            pygame.display.set_caption("Player 1: " + str(scores[0]) + "                   Player 2: " + str(scores[1]))
+
 
 
         def create_players(self):
@@ -228,6 +253,7 @@ def start_3_player(screen):
             self.new_maze()
             self.tanks = []
             self.create_players()
+            self.end_timer = 0
             try:
                 self.p1 = pygame.joystick.Joystick(0)
                 self.p1.init()
@@ -276,6 +302,7 @@ def start_3_player(screen):
                 bullet.lifespan()
                 decay_and_collision_handler(2, bullet, self.tanks)
             self.handle_inputs()
+            self.game_end_check()
 
         def handle_inputs(self):
             """
@@ -309,8 +336,32 @@ def start_3_player(screen):
         def create_players(self):
             tank_positions = get_spawnpoints(self.maze_size, 3)
             self.tanks.append(Tank(screen, tank_positions[0], "Player 1", "Assets/AFV1.png"))
-            self.tanks.append(Tank(screen, tank_positions[1], "Player 2", "Assets/AFV2.png"))
+            self.tanks.append(Tank(screen, tank_positions[1], "Player 2", "Assets/AFV1.png"))
             self.tanks.append(Tank(screen, tank_positions[2], "Player 3", "Assets/AFV1.png"))
+
+        def game_end_check(self):
+            if self.tanks[0].alive + self.tanks[1].alive + self.tanks[2].alive <= 1:
+                self.end_timer += 1
+                if self.end_timer >= 300:
+                    if not self.tanks[0].alive and not self.tanks[1].alive and not self.tanks[2].alive:
+                        self.game = False
+                        start_3_player(screen)
+                    elif not self.tanks[1].alive and not self.tanks[2].alive:
+                        self.update_score(0)
+                        self.game = False
+                        start_3_player(screen)
+                    elif not self.tanks[0].alive and not self.tanks[2].alive:
+                        self.update_score(1)
+                        self.game = False
+                        start_3_player(screen)
+                    elif not self.tanks[0].alive and not self.tanks[1]. alive:
+                        self.update_score(2)
+                        self.game = False
+                        start_3_player(screen)
+
+        def update_score(self, winner):
+            scores[winner] += 1
+            pygame.display.set_caption("Player 1: " + str(scores[0]) + "                   Player 2: " + str(scores[1]) + "                   Player3: " + str(scores[2]))
 
 
     game = MainGame()

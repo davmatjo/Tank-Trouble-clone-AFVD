@@ -26,6 +26,7 @@ fps_clock = pygame.time.Clock()
 def title_screen():
     titlescreen = True
     while titlescreen:
+        pygame.display.set_caption("AFVD")
 
         mouse_pos = pygame.mouse.get_pos()
 
