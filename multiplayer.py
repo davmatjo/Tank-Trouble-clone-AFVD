@@ -127,7 +127,7 @@ def shrapnel_handler(bullet, tank):
 
 
 def fire(t_id, tanks, screen):
-    if len(tanks[t_id].fired_bullets) < 10:
+    if len(tanks[t_id].fired_bullets) < 10 and tanks[t_id].alive:
         if tanks[t_id].powerups == 1:
             b_velocity = [degcos(tanks[t_id].angle), -degsin(tanks[t_id].angle)]
             tanks[t_id].fired_bullets.append(Mortar(screen, [tanks[t_id].position[0] + b_velocity[0] * 18,

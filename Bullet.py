@@ -131,12 +131,16 @@ class Shrapnel:
         try:
             if self.screen.get_at((int(self.position[0] + 2), int(self.position[1]))) == (0, 0, 0, 255):
                 self.velocity[0] *= 0
+                self.velocity[1] *= 0
             if self.screen.get_at((int(self.position[0]), int(self.position[1] + 2))) == (0, 0, 0, 255):
+                self.velocity[0] *= 0
                 self.velocity[1] *= 0
             if self.screen.get_at((int(self.position[0]), int(self.position[1] - 2))) == (0, 0, 0, 255):
+                self.velocity[0] *= 0
                 self.velocity[1] *= 0
             if self.screen.get_at((int(self.position[0] - 2), int(self.position[1]))) == (0, 0, 0, 255):
                 self.velocity[0] *= 0
+                self.velocity[1] *= 0
         except IndexError:
             pass
 
