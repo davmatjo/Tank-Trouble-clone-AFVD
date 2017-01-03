@@ -96,7 +96,7 @@ class Mortar:
 
     def explode(self):
         for velocity in self.shrapnel_directions:
-            self.bullets.append(Shrapnel(self.screen, [self.position[0] + velocity[0], self.position[1] + velocity[0]], velocity))
+            self.bullets.append(Shrapnel(self.screen, [self.position[0] + velocity[0] * 3, self.position[1] + velocity[0] * 3], velocity))
 
 
 

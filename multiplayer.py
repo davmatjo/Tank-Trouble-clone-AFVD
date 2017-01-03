@@ -8,7 +8,8 @@ from Tank import Tank
 from sincos import degcos
 from sincos import degsin
 from sincos import arctandeg
-from random import randrange
+from random import randrange, choice
+from powerups import Powerup
 
 window_size = (800, 800)
 FPS = 60
@@ -106,7 +107,7 @@ def get_spawnpoints(maze_size, player_count):
     return tank_positions
 
 
-def decay_and_collision_handler(t_id, bullet, tank):
+def bullet_decay_and_collision_handler(t_id, bullet, tank):
     if not tank[t_id].fired_bullets[0].alive:
         tank[t_id].fired_bullets.pop(0)
     if bullet.lifetime > 10:
@@ -114,6 +115,15 @@ def decay_and_collision_handler(t_id, bullet, tank):
             if tank[u_id].image_rect.colliderect(bullet.circle) and bullet.type == 0:
                 bullet.alive = False
                 tank[u_id].alive = False
+
+
+def powerup_collision_handler(tank, powerups):
+    for u_id in range(len(tank)):
+        for powerup in powerups:
+            if tank[u_id].image_rect.colliderect(powerup.image_rect):
+                print("Collide!")
+                powerup.alive = False
+                tank[u_id].powerups = powerup.type
 
 
 def shrapnel_handler(bullet, tank):
@@ -128,6 +138,7 @@ def shrapnel_handler(bullet, tank):
 
 def fire(t_id, tanks, screen):
     if len(tanks[t_id].fired_bullets) < 10 and tanks[t_id].alive:
+        print(tanks[t_id].powerups)
         if tanks[t_id].powerups == 1:
             b_velocity = [degcos(tanks[t_id].angle), -degsin(tanks[t_id].angle)]
             tanks[t_id].fired_bullets.append(Mortar(screen, [tanks[t_id].position[0] + b_velocity[0] * 18,
@@ -150,6 +161,7 @@ def start_2_player(screen):
             self.maze_size = 7
             self.new_maze()
             self.tanks = []
+            self.powerups = []
             self.create_players()
             self.end_timer = 0
             pygame.joystick.init()
@@ -174,6 +186,7 @@ def start_2_player(screen):
 
         def refresh(self):
             screen.blit(self.background, (0, 0))
+            self.powerup_handler()
             for tank in self.tanks:
                 if tank.alive:
                     tank.move()
@@ -185,17 +198,18 @@ def start_2_player(screen):
                 bullet.move()
                 bullet.draw()
                 bullet.lifespan()
-                decay_and_collision_handler(0, bullet, self.tanks)
+                bullet_decay_and_collision_handler(0, bullet, self.tanks)
             for bullet in self.tanks[1].fired_bullets:
                 bullet.move()
                 bullet.draw()
                 bullet.lifespan()
-                decay_and_collision_handler(1, bullet, self.tanks)
+                bullet_decay_and_collision_handler(1, bullet, self.tanks)
             for bullet in special_bullets:
                 bullet.move()
                 bullet.draw()
                 bullet.lifespan()
                 shrapnel_handler(bullet, self.tanks)
+            powerup_collision_handler(self.tanks, self.powerups)
             self.handle_inputs()
             player_1_movement(self.tanks[0], game)
             player_2_movement(self.tanks[1], game)
@@ -253,6 +267,19 @@ def start_2_player(screen):
             self.tanks.append(Tank(screen, tank_positions[1], "Player 2", "Assets/AFV1.png"))
 
 
+        def powerup_handler(self):
+            if randrange(0, 1000) >= 998:
+                points = get_spawnpoints(self.maze_size, 2)
+                chosen_point = choice(points)
+                if not any(item.position == chosen_point for item in self.powerups):
+                    self.powerups.append(Powerup(screen, chosen_point))
+            for powerup in self.powerups:
+                powerup.draw()
+                if not powerup.alive:
+                    self.powerups.pop(self.powerups.index(powerup))
+
+
+
 
 
     # initialising of all arrays and objects preparing for game
@@ -276,6 +303,7 @@ def start_3_player(screen):
             self.tanks = []
             self.create_players()
             self.end_timer = 0
+            self.powerups = []
             try:
                 self.p1 = pygame.joystick.Joystick(0)
                 self.p1.init()
@@ -312,22 +340,24 @@ def start_3_player(screen):
                 bullet.move()
                 bullet.draw()
                 bullet.lifespan()
-                decay_and_collision_handler(0, bullet, self.tanks)
+                bullet_decay_and_collision_handler(0, bullet, self.tanks)
             for bullet in self.tanks[1].fired_bullets:
                 bullet.move()
                 bullet.draw()
                 bullet.lifespan()
-                decay_and_collision_handler(1, bullet, self.tanks)
+                bullet_decay_and_collision_handler(1, bullet, self.tanks)
             for bullet in self.tanks[2].fired_bullets:
                 bullet.move()
                 bullet.draw()
                 bullet.lifespan()
-                decay_and_collision_handler(2, bullet, self.tanks)
+                bullet_decay_and_collision_handler(2, bullet, self.tanks)
             for bullet in special_bullets:
                 bullet.move()
                 bullet.draw()
                 bullet.lifespan()
                 shrapnel_handler(bullet, self.tanks)
+            self.powerup_handler()
+            powerup_collision_handler(self.tanks, self.powerups)
             self.handle_inputs()
             self.game_end_check()
 
@@ -389,6 +419,18 @@ def start_3_player(screen):
         def update_score(self, winner):
             scores[winner] += 1
             pygame.display.set_caption("Player 1: " + str(scores[0]) + "                   Player 2: " + str(scores[1]) + "                   Player3: " + str(scores[2]))
+
+        def powerup_handler(self):
+            if len(self.powerups) < 12:
+                if randrange(0, 1000) >= 998:
+                    points = get_spawnpoints(self.maze_size, 2)
+                    chosen_point = choice(points)
+                    if not any(item.position == chosen_point for item in self.powerups):
+                        self.powerups.append(Powerup(screen, chosen_point))
+                for powerup in self.powerups:
+                    powerup.draw()
+                    if not powerup.alive:
+                        self.powerups.pop(self.powerups.index(powerup))
 
 
     game = MainGame()
