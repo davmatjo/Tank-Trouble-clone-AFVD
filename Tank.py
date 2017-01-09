@@ -19,7 +19,7 @@ class Tank:
         self.image_rect = self.image.get_rect()
         self.position = position
         self.name = name
-        self.powerups = 2
+        self.powerups = 0
         self.fired_bullets = []
         self.alive = True
 
@@ -110,7 +110,6 @@ class Tank:
     def backward(self):
         i = degcos(self.angle)
         j = degsin(self.angle)
-        print(-i, j)
         self.velocity = [-i, j]
         #self.pos[0] += -i
         #self.pos[1] += j

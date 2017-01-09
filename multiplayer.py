@@ -2,9 +2,7 @@ import pygame
 import sys
 from maze import Maze
 from pygame.locals import *
-from Bullet import Bullet
-from Bullet import Mortar
-from Bullet import WallDestroyer
+from Bullet import Bullet, Mortar, WallDestroyer, Shotgun, Laser
 from Tank import Tank
 from maths import degcos
 from maths import degsin
@@ -98,12 +96,9 @@ def get_spawnpoints(maze_size, player_count):
             x_pointer += block_size
             possible_spawnpoints.append([x_pointer, y_pointer])
 
-    print(possible_spawnpoints)
     for i in range(player_count):
         tank_coordinates = randrange(0, len(possible_spawnpoints) - 1)
-        print(tank_coordinates)
         tank_coordinates = possible_spawnpoints.pop(tank_coordinates)
-        print(tank_coordinates)
         tank_positions.append(tank_coordinates)
     return tank_positions
 
@@ -122,7 +117,6 @@ def powerup_collision_handler(tank, powerups):
     for u_id in range(len(tank)):
         for powerup in powerups:
             if tank[u_id].image_rect.colliderect(powerup.image_rect):
-                print("Collide!")
                 powerup.alive = False
                 tank[u_id].powerups = powerup.type
 
@@ -148,12 +142,29 @@ def fire(t_id, tanks, screen, maze):
             tanks[t_id].fired_bullets.append(Mortar(screen, [tanks[t_id].position[0] + b_velocity[0] * 18,
                                                              tanks[t_id].position[1] + b_velocity[1] * 18],
                                                     b_velocity, special_bullets))
+
             tanks[t_id].powerups = 0
+
         elif tanks[t_id].powerups == 2:
             b_velocity = [degcos(tanks[t_id].angle) * 2, -degsin(tanks[t_id].angle) * 2]
             special_bullets.append(WallDestroyer(screen, [tanks[t_id].position[0] + b_velocity[0] * 20,
                                                              tanks[t_id].position[1] + b_velocity[1] * 20],
                                                     b_velocity, maze, window_size))
+            tanks[t_id].powerups = 0
+
+        elif tanks[t_id].powerups == 3:
+            b_velocity = [degcos(tanks[t_id].angle), -degsin(tanks[t_id].angle)]
+            tanks[t_id].fired_bullets.append(Shotgun(screen, [tanks[t_id].position[0] + b_velocity[0] * 18,
+                                                             tanks[t_id].position[1] + b_velocity[1] * 18],
+                                                    b_velocity, special_bullets, tanks[t_id].angle))
+            tanks[t_id].powerups = 0
+
+        elif tanks[t_id].powerups == 4:
+            b_velocity = [degcos(tanks[t_id].angle) * 15, -degsin(tanks[t_id].angle) * 15]
+            tanks[t_id].fired_bullets.append(Laser(screen, [tanks[t_id].position[0] + b_velocity[0],
+                                                             tanks[t_id].position[1] + b_velocity[1]],
+                                                    b_velocity, tanks[t_id].fired_bullets))
+            tanks[t_id].powerups = 0
 
         else:
             b_velocity = [2 * degcos(tanks[t_id].angle), -2 * degsin(tanks[t_id].angle)]
@@ -367,7 +378,7 @@ def start_3_player(screen):
                 bullet.move()
                 bullet.draw()
                 bullet.lifespan()
-                shrapnel_handler(bullet, self.tanks)
+                shrapnel_handler(bullet, self.tanks, game)
             self.powerup_handler()
             powerup_collision_handler(self.tanks, self.powerups)
             self.handle_inputs()
