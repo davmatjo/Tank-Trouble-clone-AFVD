@@ -235,7 +235,7 @@ class Shotgun:
         self.lifetime = 0
         self.type = 1
         self.pellet_directions = []
-        for i in range(self.angle - 30, self.angle + 30, 5):
+        for i in range(int(self.angle - 30), int(self.angle + 30), 5):
             self.pellet_directions.append([degcos(i) * 5, -degsin(i) * 5])
         self.bullets = bullets
 
