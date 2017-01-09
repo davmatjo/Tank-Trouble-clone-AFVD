@@ -2,12 +2,11 @@ import pygame
 import sys
 from maze import Maze
 from pygame.locals import *
-from Bullet import Bullet
-from Bullet import Mortar
+from Bullet import Bullet, Mortar, WallDestroyer, Shotgun, Laser
 from Tank import Tank
-from sincos import degcos
-from sincos import degsin
-from sincos import arctandeg
+from maths import degcos
+from maths import degsin
+from maths import arctandeg
 from random import randrange, choice
 from powerups import Powerup
 
@@ -97,12 +96,9 @@ def get_spawnpoints(maze_size, player_count):
             x_pointer += block_size
             possible_spawnpoints.append([x_pointer, y_pointer])
 
-    print(possible_spawnpoints)
     for i in range(player_count):
         tank_coordinates = randrange(0, len(possible_spawnpoints) - 1)
-        print(tank_coordinates)
         tank_coordinates = possible_spawnpoints.pop(tank_coordinates)
-        print(tank_coordinates)
         tank_positions.append(tank_coordinates)
     return tank_positions
 
@@ -121,13 +117,14 @@ def powerup_collision_handler(tank, powerups):
     for u_id in range(len(tank)):
         for powerup in powerups:
             if tank[u_id].image_rect.colliderect(powerup.image_rect):
-                print("Collide!")
                 powerup.alive = False
                 tank[u_id].powerups = powerup.type
 
 
-def shrapnel_handler(bullet, tank):
+def shrapnel_handler(bullet, tank, game):
     if not bullet.alive:
+        if bullet.type == 1:
+            game.background = pygame.transform.scale(pygame.image.load("maze.png"), window_size)
         special_bullets.pop(0)
     for u_id in range(len(tank)):
         if tank[u_id].image_rect.colliderect(bullet.circle) and bullet.type == 0:
@@ -136,15 +133,39 @@ def shrapnel_handler(bullet, tank):
 
 
 
-def fire(t_id, tanks, screen):
+
+
+def fire(t_id, tanks, screen, maze):
     if len(tanks[t_id].fired_bullets) < 10 and tanks[t_id].alive:
-        print(tanks[t_id].powerups)
         if tanks[t_id].powerups == 1:
             b_velocity = [degcos(tanks[t_id].angle), -degsin(tanks[t_id].angle)]
             tanks[t_id].fired_bullets.append(Mortar(screen, [tanks[t_id].position[0] + b_velocity[0] * 18,
                                                              tanks[t_id].position[1] + b_velocity[1] * 18],
                                                     b_velocity, special_bullets))
+
             tanks[t_id].powerups = 0
+
+        elif tanks[t_id].powerups == 2:
+            b_velocity = [degcos(tanks[t_id].angle) * 2, -degsin(tanks[t_id].angle) * 2]
+            special_bullets.append(WallDestroyer(screen, [tanks[t_id].position[0] + b_velocity[0] * 20,
+                                                             tanks[t_id].position[1] + b_velocity[1] * 20],
+                                                    b_velocity, maze, window_size))
+            tanks[t_id].powerups = 0
+
+        elif tanks[t_id].powerups == 3:
+            b_velocity = [degcos(tanks[t_id].angle), -degsin(tanks[t_id].angle)]
+            tanks[t_id].fired_bullets.append(Shotgun(screen, [tanks[t_id].position[0] + b_velocity[0] * 18,
+                                                             tanks[t_id].position[1] + b_velocity[1] * 18],
+                                                    b_velocity, special_bullets, tanks[t_id].angle))
+            tanks[t_id].powerups = 0
+
+        elif tanks[t_id].powerups == 4:
+            b_velocity = [degcos(tanks[t_id].angle) * 15, -degsin(tanks[t_id].angle) * 15]
+            tanks[t_id].fired_bullets.append(Laser(screen, [tanks[t_id].position[0] + b_velocity[0],
+                                                             tanks[t_id].position[1] + b_velocity[1]],
+                                                    b_velocity, tanks[t_id].fired_bullets))
+            tanks[t_id].powerups = 0
+
         else:
             b_velocity = [2 * degcos(tanks[t_id].angle), -2 * degsin(tanks[t_id].angle)]
             tanks[t_id].fired_bullets.append(Bullet(screen, [tanks[t_id].position[0] + b_velocity[0] * 18,
@@ -159,7 +180,7 @@ def start_2_player(screen):
         def __init__(self):
             self.game = True
             self.maze_size = 7
-            self.new_maze()
+            self.maze = self.new_maze()
             self.tanks = []
             self.powerups = []
             self.create_players()
@@ -183,6 +204,7 @@ def start_2_player(screen):
             my_maze.render_maze()
             maze_image = pygame.image.load("maze.png").convert()
             self.background = pygame.transform.scale(maze_image, window_size)
+            return my_maze
 
         def refresh(self):
             screen.blit(self.background, (0, 0))
@@ -208,7 +230,7 @@ def start_2_player(screen):
                 bullet.move()
                 bullet.draw()
                 bullet.lifespan()
-                shrapnel_handler(bullet, self.tanks)
+                shrapnel_handler(bullet, self.tanks, game)
             powerup_collision_handler(self.tanks, self.powerups)
             self.handle_inputs()
             player_1_movement(self.tanks[0], game)
@@ -226,17 +248,17 @@ def start_2_player(screen):
 
                 if event.type == KEYDOWN:
                     if event.key == K_e and self.tanks[0].alive:
-                        fire(0, self.tanks, screen)
+                        fire(0, self.tanks, screen, self.maze)
                     if event.key == K_KP0 and self.tanks[1].alive:
-                        fire(1, self.tanks, screen)
+                        fire(1, self.tanks, screen, self.maze)
                     if event.key == K_ESCAPE:
                         game.game = False
 
                 if event.type == JOYBUTTONDOWN:
                     if event.button == 0 and event.joy == 0 and self.tanks[0].alive:
-                        fire(0, self.tanks, screen)
+                        fire(0, self.tanks, screen, self.maze)
                     if event.button == 0 and event.joy == 1 and self.tanks[1].alive:
-                        fire(1, self.tanks, screen)
+                        fire(1, self.tanks, screen, self.maze)
 
 
         def game_end_check(self):
@@ -299,7 +321,7 @@ def start_3_player(screen):
         def __init__(self):
             self.game = True
             self.maze_size = 8
-            self.new_maze()
+            self.maze = self.new_maze()
             self.tanks = []
             self.create_players()
             self.end_timer = 0
@@ -326,6 +348,7 @@ def start_3_player(screen):
             my_maze.render_maze()
             maze_image = pygame.image.load("maze.png").convert()
             self.background = pygame.transform.scale(maze_image, window_size)
+            return my_maze
 
         def refresh(self):
             screen.blit(self.background, (0, 0))
@@ -355,7 +378,7 @@ def start_3_player(screen):
                 bullet.move()
                 bullet.draw()
                 bullet.lifespan()
-                shrapnel_handler(bullet, self.tanks)
+                shrapnel_handler(bullet, self.tanks, game)
             self.powerup_handler()
             powerup_collision_handler(self.tanks, self.powerups)
             self.handle_inputs()
@@ -374,21 +397,21 @@ def start_3_player(screen):
                     sys.exit()
                 if event.type == KEYDOWN:
                     if event.key == K_e:
-                        fire(0, self.tanks, screen)
+                        fire(0, self.tanks, screen, self.maze)
                     if event.key == K_KP0:
-                        fire(1, self.tanks, screen)
+                        fire(1, self.tanks, screen, self.maze)
                     if event.key == K_o:
-                        fire(2, self.tanks, screen)
+                        fire(2, self.tanks, screen, self.maze_size)
                     if event.key == K_ESCAPE:
                         game.game = False
 
                 if event.type == JOYBUTTONDOWN:
                     if event.button == 0 and event.joy == 0:
-                        fire(0, self.tanks, screen)
+                        fire(0, self.tanks, screen, self.maze)
                     if event.button == 0 and event.joy == 1:
-                        fire(1, self.tanks, screen)
+                        fire(1, self.tanks, screen, self.maze)
                     if event.button == 0 and event.joy == 2:
-                        fire(2, self.tanks, screen)
+                        fire(2, self.tanks, screen, self.maze)
 
         def create_players(self):
             tank_positions = get_spawnpoints(self.maze_size, 3)
