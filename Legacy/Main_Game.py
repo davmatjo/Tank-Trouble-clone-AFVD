@@ -5,8 +5,8 @@ from maze import Maze
 from pygame.locals import *
 from Bullet import Bullet
 from Tank import Tank
-from sincos import degcos
-from sincos import degsin
+from maths import degcos
+from maths import degsin
 
 
 pygame.init()

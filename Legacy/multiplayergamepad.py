@@ -4,9 +4,9 @@ from maze import Maze
 from pygame.locals import *
 from Bullet import Bullet
 from Tank import Tank
-from sincos import degcos
-from sincos import degsin
-from sincos import arctandeg
+from maths import degcos
+from maths import degsin
+from maths import arctandeg
 from random import randrange
 
 window_size = (800, 800)

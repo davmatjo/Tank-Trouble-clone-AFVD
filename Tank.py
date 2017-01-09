@@ -2,8 +2,8 @@ import pygame
 from pygame.locals import *
 import sys
 from Bullet import Bullet
-from sincos import degcos
-from sincos import degsin
+from maths import degcos
+from maths import degsin
 
 
 class Tank:
@@ -19,7 +19,7 @@ class Tank:
         self.image_rect = self.image.get_rect()
         self.position = position
         self.name = name
-        self.powerups = 0
+        self.powerups = 2
         self.fired_bullets = []
         self.alive = True
 
