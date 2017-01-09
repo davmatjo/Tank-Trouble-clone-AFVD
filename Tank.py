@@ -2,8 +2,8 @@ import pygame
 from pygame.locals import *
 import sys
 from Bullet import Bullet
-from sincos import degcos
-from sincos import degsin
+from maths import degcos
+from maths import degsin
 
 
 class Tank:
@@ -110,7 +110,6 @@ class Tank:
     def backward(self):
         i = degcos(self.angle)
         j = degsin(self.angle)
-        print(-i, j)
         self.velocity = [-i, j]
         #self.pos[0] += -i
         #self.pos[1] += j

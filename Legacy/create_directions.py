@@ -1,4 +1,4 @@
-from sincos import degcos, degsin
+from maths import degcos, degsin
 directions = []
 
 for i in range(0, 360, 4):
