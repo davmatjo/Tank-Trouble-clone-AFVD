@@ -1,7 +1,7 @@
 import pygame
 import sys
 from pygame.locals import *
-from multiplayer import start_2_player, start_3_player
+from multiplayer import start_2_player, start_3_player, start_1_player
 
 pygame.init()
 window_size = (800, 800)
@@ -35,7 +35,7 @@ def title_screen():
         # Draw rectangles and buttons each refresh
         pygame.draw.rect(screen, (31, 196, 209), (20, 20, 760, 170))
 
-        button("1 Player", 250, 300, 300, 60)
+        button("1 Player", 250, 300, 300, 60, start_1_player)
         button("2 Players", 250, 400, 300, 60, start_2_player)
         button("3 Players", 250, 500, 300, 60, start_3_player)
         button("Help", 680, 720, 100, 60, help_screen)

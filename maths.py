@@ -25,7 +25,6 @@ def arctandeg(x, y):
 
 def get_player_grid(position, maze_size, screen_size):
     grid_size = screen_size[0] / maze_size
-    print(position)
     grid_ref = [floor(position[0] / grid_size), floor(position[1] / grid_size)]
     return  grid_ref
 
