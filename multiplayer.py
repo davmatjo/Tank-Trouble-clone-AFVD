@@ -560,15 +560,15 @@ def start_1_player(screen):
                 if self.end_timer >= 350:
                     if not self.tanks[0].alive and not self.tanks[1].alive:
                         self.running = False
-                        start_2_player(screen)
+                        start_1_player(screen)
                     elif not self.tanks[1].alive:
                         self.update_score(0)
                         self.running = False
-                        start_2_player(screen)
+                        start_1_player(screen)
                     elif not self.tanks[0].alive:
                         self.update_score(1)
                         self.running = False
-                        start_2_player(screen)
+                        start_1_player(screen)
 
         def update_score(self, winner):
             scores[winner] += 1
@@ -618,6 +618,7 @@ class Ai:
         self.delay = 0
         self.screen = screen
         self.previous_grid = []
+        self.previous_movement = 0
 
     def get_player_angle(self):
         enemy_position = self.tanks[0].position
@@ -653,16 +654,21 @@ class Ai:
             available_moves = []
             walls_up = self.game.maze.maze[current_grid[0]][current_grid[1]]
             print("walls:", walls_up)
-            if not walls_up & NORTH:
+            if not walls_up & NORTH and not self.previous_movement == NORTH:
                 available_moves.append(NORTH)
-            if not walls_up & SOUTH:
+            if not walls_up & SOUTH and not self.previous_movement == SOUTH:
                 available_moves.append(SOUTH)
-            if not walls_up & EAST:
+            if not walls_up & EAST and not self.previous_movement == EAST:
                 available_moves.append(EAST)
-            if not walls_up & WEST:
+            if not walls_up & WEST and not self.previous_movement == WEST:
                 available_moves.append(WEST)
             print("moves:", available_moves)
+            if not available_moves:
+                available_moves.append(self.previous_movement)
             self.current_movement = choice(available_moves)
+
+            print("moving", self.current_movement)
+
             self.previous_grid = current_grid
         if self.current_movement == NORTH:
             if not current_grid == self.previous_grid:
@@ -688,6 +694,15 @@ class Ai:
     def stop_moving(self):
         self.delay += 1
         if self.delay >= 25:
+            if self.current_movement == NORTH:
+                self.previous_movement = SOUTH
+            if self.current_movement == EAST:
+                self.previous_movement = WEST
+            if self.current_movement == SOUTH:
+                self.previous_movement = NORTH
+            if self.current_movement == WEST:
+                self.previous_movement = EAST
+
             self.current_movement = None
             self.delay = 0
 
