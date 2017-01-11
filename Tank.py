@@ -50,13 +50,17 @@ class Tank:
         if self.position[1] < 0 or self.position[1] > 800:
             self.velocity[1] *= -2
         if self.screen.get_at((center[0] + 10, center[1])) == (0, 0, 0, 255):
-            self.velocity[0] *= -2
+            if self.velocity[0] > 0:
+                self.velocity[0] = 0
         if self.screen.get_at((center[0], center[1] + 10)) == (0, 0, 0, 255):
-            self.velocity[1] *= -2
+            if self.velocity[1] > 0:
+                self.velocity[1] = 0
         if self.screen.get_at((center[0] - 10, center[1])) == (0, 0, 0, 255):
-            self.velocity[1] *= -2
+             if self.velocity[0] < 0:
+                 self.velocity[0] = 0
         if self.screen.get_at((center[0], center[1] - 10)) == (0, 0, 0, 255):
-            self.velocity[0] *= -2
+            if self.velocity[1] < 0:
+                self.velocity[1] = 0
         # if self.screen.get_at((center[0] + 10, center[1] + 10)) == (0, 0, 0, 255):
         #     self.velocity[0] *= -1
         # if self.screen.get_at((center[0] + 10, center[1] - 10)) == (0, 0, 0, 255):
