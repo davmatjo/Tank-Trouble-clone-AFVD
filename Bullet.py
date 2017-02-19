@@ -32,18 +32,17 @@ class Bullet:
     def move(self):
         self.position[0] += self.velocity[0]
         self.position[1] += self.velocity[1]
-        if self.position[0] < 0 or self.position[0] > 800:
-            self.velocity[0] *= -1
-        if self.position[1] < 0 or self.position[1] > 800:
-            self.velocity[1] *= -1
-        if self.screen.get_at((int(self.position[0] + 4), int(self.position[1]))) == (0, 0, 0, 255):
-            self.velocity[0] *= -1
-        if self.screen.get_at((int(self.position[0]), int(self.position[1] + 4))) == (0, 0, 0, 255):
-            self.velocity[1] *= -1
-        if self.screen.get_at((int(self.position[0]), int(self.position[1] - 4))) == (0, 0, 0, 255):
-            self.velocity[1] *= -1
-        if self.screen.get_at((int(self.position[0] - 4), int(self.position[1]))) == (0, 0, 0, 255):
-            self.velocity[0] *= -1
+        if self.position[0] < 4 or self.position[0] > 795 or self.position[1] < 4 or self.position[1] > 795:
+            self.alive = False
+        else:
+            if self.screen.get_at((int(self.position[0] + 4), int(self.position[1]))) == (0, 0, 0, 255):
+                self.velocity[0] *= -1
+            if self.screen.get_at((int(self.position[0]), int(self.position[1] + 4))) == (0, 0, 0, 255):
+                self.velocity[1] *= -1
+            if self.screen.get_at((int(self.position[0]), int(self.position[1] - 4))) == (0, 0, 0, 255):
+                self.velocity[1] *= -1
+            if self.screen.get_at((int(self.position[0] - 4), int(self.position[1]))) == (0, 0, 0, 255):
+                self.velocity[0] *= -1
 
     def lifespan(self):
         self.lifetime += 1

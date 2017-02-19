@@ -9,7 +9,7 @@ from maths import degsin
 from maths import arctandeg
 from random import randrange, choice
 from powerups import Powerup
-from multiplayer import controller_movement, player_1_movement
+from main_game import controller_movement, player_1_movement
 window_size = (800, 800)
 FPS = 60
 fps_clock = pygame.time.Clock()

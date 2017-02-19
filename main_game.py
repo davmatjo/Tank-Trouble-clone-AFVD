@@ -293,7 +293,7 @@ def start_2_player(screen):
         def create_players(self):
             tank_positions = get_spawnpoints(self.maze_size, 2)
             self.tanks.append(Tank(screen, tank_positions[0], "Player 1", "Assets/AFV1.png"))
-            self.tanks.append(Tank(screen, tank_positions[1], "Player 2", "Assets/AFV1.png"))
+            self.tanks.append(Tank(screen, tank_positions[1], "Player 2", "Assets/AFV2.png"))
 
 
         def powerup_handler(self):
@@ -306,10 +306,6 @@ def start_2_player(screen):
                 powerup.draw()
                 if not powerup.alive:
                     self.powerups.pop(self.powerups.index(powerup))
-
-
-
-
 
     # initialising of all arrays and objects preparing for game
     game = MainGame()
@@ -408,7 +404,7 @@ def start_3_player(screen):
                     if event.key == K_KP0:
                         fire(1, self.tanks, screen, self.maze)
                     if event.key == K_o:
-                        fire(2, self.tanks, screen, self.maze_size)
+                        fire(2, self.tanks, screen, self.maze)
                     if event.key == K_ESCAPE:
                         game.game = False
 
@@ -423,8 +419,8 @@ def start_3_player(screen):
         def create_players(self):
             tank_positions = get_spawnpoints(self.maze_size, 3)
             self.tanks.append(Tank(screen, tank_positions[0], "Player 1", "Assets/AFV1.png"))
-            self.tanks.append(Tank(screen, tank_positions[1], "Player 2", "Assets/AFV1.png"))
-            self.tanks.append(Tank(screen, tank_positions[2], "Player 3", "Assets/AFV1.png"))
+            self.tanks.append(Tank(screen, tank_positions[1], "Player 2", "Assets/AFV2.png"))
+            self.tanks.append(Tank(screen, tank_positions[2], "Player 3", "Assets/AFV3.png"))
 
         def game_end_check(self):
             if self.tanks[0].alive + self.tanks[1].alive + self.tanks[2].alive <= 1:
