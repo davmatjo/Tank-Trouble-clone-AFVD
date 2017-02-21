@@ -1,9 +1,4 @@
-from math import sin
-from math import cos
-from math import radians
-from math import degrees
-from math import atan
-from math import floor
+from math import sin, cos, radians, degrees, atan, floor
 
 
 def degsin(x):

@@ -2,8 +2,7 @@ import pygame
 from pygame.locals import *
 import sys
 from Bullet import Bullet
-from maths import degcos
-from maths import degsin
+from maths import degcos, degsin
 
 
 class Tank:
@@ -67,11 +66,16 @@ class Tank:
         self.image_rect = temp_rect
 
     def set_angle(self, angle):
+        """set the angle of an image while keeping its center and size"""
         self.angle = angle
 
+        # Store a temporary rotated image at the correct angle
         temp_image = pygame.transform.rotate(self.original_image, self.angle)
+        # Obtain the bounding rect of the temporary image
         temp_rect = temp_image.get_rect()
+        # Set the center of the rect
         temp_rect.center = self.image_rect.center
+        # Set the temporary rect and image to the actual rect and image
         self.image = temp_image
         self.image_rect = temp_rect
 
@@ -91,7 +95,12 @@ class Tank:
         self.screen.blit(self.image, self.image_rect)
 
     def dead(self):
+        # Load the new image
         self.original_image = self.death_image
+
+        # Rotate the new image to correct angle
         self.turn(0)
+
+        # Draw image onto screen
         self.draw()
 

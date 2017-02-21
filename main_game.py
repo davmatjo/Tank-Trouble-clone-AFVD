@@ -4,10 +4,7 @@ from maze import Maze
 from pygame.locals import *
 from Bullet import Bullet, Mortar, WallDestroyer, Shotgun, Laser
 from Tank import Tank
-from maths import degcos
-from maths import degsin
-from maths import arctandeg
-from maths import get_player_grid
+from maths import degcos, degsin, arctandeg, get_player_grid
 from random import randrange, choice
 from powerups import Powerup
 
@@ -25,15 +22,22 @@ special_bullets = []
 
 
 def controller_movement(afv, player):
+    """
+    Use
+    :param afv: Armoured fighting vehicle (tank)
+    :param player: player joystick object
+    :return:
+    """
     x_vel = player.get_axis(0)
     y_vel = player.get_axis(1)
-    # deadzone allowance
+    # Dead-zone allowance
     if not (-0.2 < x_vel < 0.2 and -0.2 < y_vel < 0.2):
+        # Check the quadrant of the joystick then use arctan and add appropriate offset
         if x_vel > 0 and y_vel > 0:
             afv.set_angle(arctandeg(x_vel, -y_vel))
-        if x_vel > 0 and y_vel < 0:
+        if x_vel > 0 > y_vel:
             afv.set_angle(arctandeg(x_vel, -y_vel) + 360)
-        if x_vel < 0 and y_vel > 0:
+        if x_vel < 0 < y_vel:
             afv.set_angle(arctandeg(x_vel, -y_vel) + 180)
         if x_vel < 0 and y_vel < 0:
             afv.set_angle(arctandeg(x_vel, -y_vel) + 180)
@@ -92,17 +96,30 @@ def player_3_movement(afv, game):
 
 
 def get_spawnpoints(maze_size, player_count):
+    """
+    Dual functionality - spawnpoints for tanks and powerups
+    :param maze_size: Size of maze
+    :param player_count: Number of possible spawnpoints to return
+    :return: List of size player_count
+    """
+
+    # Calculate spacing between spawnpoints
     block_size = (window_size[0] / maze_size)
+
+    # Initialise lists
     possible_spawnpoints = []
     tank_positions = []
+
+    # Build a list of grid mid-points
     y_pointer = -(block_size / 2)
-    for i in range(maze_size):
+    for i in range(maze_size):  # Go through each possible y co-ord
         x_pointer = -(block_size / 2)
         y_pointer += block_size
-        for j in range(maze_size):
+        for j in range(maze_size):  # For each y co-ord, add every x and y co-ord to the list
             x_pointer += block_size
             possible_spawnpoints.append([x_pointer, y_pointer])
 
+    # For each player, add a random coordinate to the list
     for i in range(player_count):
         tank_coordinates = randrange(0, len(possible_spawnpoints) - 1)
         tank_coordinates = possible_spawnpoints.pop(tank_coordinates)
@@ -111,9 +128,21 @@ def get_spawnpoints(maze_size, player_count):
 
 
 def bullet_decay_and_collision_handler(t_id, bullet, tank):
+    """
+    Check each bullet for collisions each refresh and destroy bullets marked as dead
+    :param t_id: list id of tank being checked
+    :param bullet: bullet object being checked
+    :param tank: list of tanks
+    :return:
+    """
+
+    # Check the first bullet in the list for life
     if not tank[t_id].fired_bullets[0].alive:
         tank[t_id].fired_bullets.pop(0)
+
+    # Allows the bullet to clear the firing tank before becoming deadly
     if bullet.lifetime > 10:
+        # Checking every tank with the bullet for collisions
         for u_id in range(len(tank)):
             if tank[u_id].image_rect.colliderect(bullet.circle) and bullet.type == 0:
                 bullet.alive = False
@@ -121,14 +150,22 @@ def bullet_decay_and_collision_handler(t_id, bullet, tank):
 
 
 def powerup_collision_handler(tank, powerups):
+    """
+    Check for tanks colliding with powerups. If a collision occurs, give tank the powerup
+    :param tank: list of tanks
+    :param powerups: list of powerups
+    :return:
+    """
+    # For every tank, check every powerup
     for u_id in range(len(tank)):
         for powerup in powerups:
+            # If the tank has collided, kill the powerup, give the tank the powerup type
             if tank[u_id].image_rect.colliderect(powerup.image_rect):
                 powerup.alive = False
                 tank[u_id].powerups = powerup.type
 
 
-def shrapnel_handler(bullet, tank, game):
+def special_decay_and_collision_handler(bullet, tank, game):
     if not bullet.alive:
         if bullet.type == 1:
             game.background = pygame.transform.scale(pygame.image.load("maze.png"), window_size)
@@ -139,11 +176,18 @@ def shrapnel_handler(bullet, tank, game):
             tank[u_id].alive = False
 
 
-
-
-
 def fire(t_id, tanks, screen, maze):
+    """
+    Make the tank you want fire
+    :param t_id: The list id of the tank
+    :param tanks: The list of tanks
+    :param screen: The screen variable
+    :param maze: The maze object
+    :return:
+    """
     if len(tanks[t_id].fired_bullets) < 10 and tanks[t_id].alive:
+
+        # Fire Mortar
         if tanks[t_id].powerups == 1:
             b_velocity = [degcos(tanks[t_id].angle), -degsin(tanks[t_id].angle)]
             tanks[t_id].fired_bullets.append(Mortar(screen, [tanks[t_id].position[0] + b_velocity[0] * 18,
@@ -152,6 +196,7 @@ def fire(t_id, tanks, screen, maze):
 
             tanks[t_id].powerups = 0
 
+        # Fire Wall Destroyer
         elif tanks[t_id].powerups == 2:
             b_velocity = [degcos(tanks[t_id].angle) * 2, -degsin(tanks[t_id].angle) * 2]
             special_bullets.append(WallDestroyer(screen, [tanks[t_id].position[0] + b_velocity[0] * 20,
@@ -159,6 +204,7 @@ def fire(t_id, tanks, screen, maze):
                                                     b_velocity, maze, window_size))
             tanks[t_id].powerups = 0
 
+        # Fire Shotgun
         elif tanks[t_id].powerups == 3:
             b_velocity = [degcos(tanks[t_id].angle), -degsin(tanks[t_id].angle)]
             tanks[t_id].fired_bullets.append(Shotgun(screen, [tanks[t_id].position[0] + b_velocity[0] * 18,
@@ -166,6 +212,7 @@ def fire(t_id, tanks, screen, maze):
                                                     b_velocity, special_bullets, tanks[t_id].angle))
             tanks[t_id].powerups = 0
 
+        # Fire Laser
         elif tanks[t_id].powerups == 4:
             b_velocity = [degcos(tanks[t_id].angle) * 15, -degsin(tanks[t_id].angle) * 15]
             tanks[t_id].fired_bullets.append(Laser(screen, [tanks[t_id].position[0] + b_velocity[0],
@@ -173,6 +220,7 @@ def fire(t_id, tanks, screen, maze):
                                                     b_velocity, tanks[t_id].fired_bullets))
             tanks[t_id].powerups = 0
 
+        # Fire normal Bullet
         else:
             b_velocity = [2 * degcos(tanks[t_id].angle), -2 * degsin(tanks[t_id].angle)]
             tanks[t_id].fired_bullets.append(Bullet(screen, [tanks[t_id].position[0] + b_velocity[0] * 18,
@@ -192,7 +240,9 @@ def start_2_player(screen):
             self.powerups = []
             self.create_players()
             self.end_timer = 0
+            # Initialise joystick module
             pygame.joystick.init()
+            # Ignore joystick if any error occurs
             try:
                 self.p1 = pygame.joystick.Joystick(0)
                 self.p1.init()
@@ -237,7 +287,7 @@ def start_2_player(screen):
                 bullet.move()
                 bullet.draw()
                 bullet.lifespan()
-                shrapnel_handler(bullet, self.tanks, game)
+                special_decay_and_collision_handler(bullet, self.tanks, game)
             powerup_collision_handler(self.tanks, self.powerups)
             self.handle_inputs()
             player_1_movement(self.tanks[0], game)
@@ -269,39 +319,53 @@ def start_2_player(screen):
 
 
         def game_end_check(self):
+            # Check if any number of tanks are dead
             if not (self.tanks[0].alive and self.tanks[1].alive):
                 self.end_timer += 1
+                # Wait 350 ticks before continuing
                 if self.end_timer >= 350:
+                    # If everyone is dead, just restart game
                     if not self.tanks[0].alive and not self.tanks[1].alive:
                         self.game = False
                         start_2_player(screen)
+                    # If player 2 is dead
                     elif not self.tanks[1].alive:
                         self.update_score(0)
                         self.game = False
                         start_2_player(screen)
+                    # If player 1 is dead
                     elif not self.tanks[0].alive:
                         self.update_score(1)
                         self.game = False
                         start_2_player(screen)
 
         def update_score(self, winner):
+            # Update score for the winner and update window title with scores
             scores[winner] += 1
-            pygame.display.set_caption("Player 1: " + str(scores[0]) + "                   Player 2: " + str(scores[1]))
-
-
+            pygame.display.set_caption("AFVD - Player 1: " + str(scores[0]) + "                   Player 2: " + str(scores[1]))
 
         def create_players(self):
             tank_positions = get_spawnpoints(self.maze_size, 2)
             self.tanks.append(Tank(screen, tank_positions[0], "Player 1", "Assets/AFV1.png"))
             self.tanks.append(Tank(screen, tank_positions[1], "Player 2", "Assets/AFV2.png"))
 
-
         def powerup_handler(self):
+            """
+            Choose location to spawn powerups, destroy dead ones
+            :return:
+            """
+            # Random chance for powerup to spawn
             if randrange(0, 1000) >= 998:
+
+                # Get list of available spawnpoints
                 points = get_spawnpoints(self.maze_size, 2)
                 chosen_point = choice(points)
+
+                # Check that none of the powerups exist there already
                 if not any(item.position == chosen_point for item in self.powerups):
                     self.powerups.append(Powerup(screen, chosen_point))
+
+            # Draw every alive powerup, delete dead ones
             for powerup in self.powerups:
                 powerup.draw()
                 if not powerup.alive:
@@ -381,7 +445,7 @@ def start_3_player(screen):
                 bullet.move()
                 bullet.draw()
                 bullet.lifespan()
-                shrapnel_handler(bullet, self.tanks, game)
+                special_decay_and_collision_handler(bullet, self.tanks, game)
             self.powerup_handler()
             powerup_collision_handler(self.tanks, self.powerups)
             self.handle_inputs()
@@ -519,7 +583,7 @@ def start_1_player(screen):
                 bullet.move()
                 bullet.draw()
                 bullet.lifespan()
-                shrapnel_handler(bullet, self.tanks, game)
+                special_decay_and_collision_handler(bullet, self.tanks, game)
             powerup_collision_handler(self.tanks, self.powerups)
             self.handle_inputs()
             player_1_movement(self.tanks[0], game)
