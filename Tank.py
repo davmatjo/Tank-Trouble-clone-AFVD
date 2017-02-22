@@ -22,6 +22,7 @@ class Tank:
         self.powerups = 0
         self.fired_bullets = []
         self.alive = True
+        self.colliding = False
 
 
     def set_velocity(self, velocity):
@@ -34,19 +35,28 @@ class Tank:
         return self.position
 
     def move(self):
+        self.colliding = False
         center = list(self.image_rect.center)
-        if self.screen.get_at((center[0] + 10, center[1])) == (0, 0, 0, 255):
+        if self.screen.get_at((center[0] + 15, center[1])) == (0, 0, 0, 255):
             if self.velocity[0] > 0:
                 self.velocity[0] = 0
-        if self.screen.get_at((center[0], center[1] + 10)) == (0, 0, 0, 255):
+            self.velocity[1] = 0
+            self.colliding = True
+        if self.screen.get_at((center[0], center[1] + 15)) == (0, 0, 0, 255):
             if self.velocity[1] > 0:
                 self.velocity[1] = 0
-        if self.screen.get_at((center[0] - 10, center[1])) == (0, 0, 0, 255):
+            self.velocity[0] = 0
+            self.colliding = True
+        if self.screen.get_at((center[0] - 15, center[1])) == (0, 0, 0, 255):
              if self.velocity[0] < 0:
-                 self.velocity[0] = 0
-        if self.screen.get_at((center[0], center[1] - 10)) == (0, 0, 0, 255):
+                self.velocity[0] = 0
+             self.velocity[1] = 0
+             self.colliding = True
+        if self.screen.get_at((center[0], center[1] - 15)) == (0, 0, 0, 255):
             if self.velocity[1] < 0:
                 self.velocity[1] = 0
+            self.velocity[0] = 0
+            self.colliding = True
         self.position[0] += self.velocity[0]
         self.position[1] += self.velocity[1]
 

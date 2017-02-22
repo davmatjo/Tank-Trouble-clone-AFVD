@@ -141,7 +141,7 @@ def bullet_decay_and_collision_handler(t_id, bullet, tank):
         tank[t_id].fired_bullets.pop(0)
 
     # Allows the bullet to clear the firing tank before becoming deadly
-    if bullet.lifetime > 10:
+    if bullet.lifetime > 8:
         # Checking every tank with the bullet for collisions
         for u_id in range(len(tank)):
             if tank[u_id].image_rect.colliderect(bullet.circle) and bullet.type == 0:
@@ -221,7 +221,7 @@ def fire(t_id, tanks, screen, maze):
             tanks[t_id].powerups = 0
 
         # Fire normal Bullet
-        else:
+        elif not tanks[t_id].colliding:
             b_velocity = [2 * degcos(tanks[t_id].angle), -2 * degsin(tanks[t_id].angle)]
             tanks[t_id].fired_bullets.append(Bullet(screen, [tanks[t_id].position[0] + b_velocity[0] * 18,
                                                                   tanks[t_id].position[1] + b_velocity[1] * 18],
