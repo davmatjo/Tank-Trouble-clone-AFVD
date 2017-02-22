@@ -166,8 +166,16 @@ def powerup_collision_handler(tank, powerups):
 
 
 def special_decay_and_collision_handler(bullet, tank, game):
+    """
+    Very similar to normal handler, however, checks bullet type for the wall destroyer
+    :param bullet: list of special bullets
+    :param tank: list of tanks
+    :param game: game object
+    :return:
+    """
     if not bullet.alive:
-        if bullet.type == 1:
+        # Check if the bullet is a wall destroyer
+        if bullet.type == 2:
             game.background = pygame.transform.scale(pygame.image.load("maze.png"), window_size)
         special_bullets.pop(0)
     for u_id in range(len(tank)):
@@ -264,8 +272,13 @@ def start_2_player(screen):
             return my_maze
 
         def refresh(self):
+            """
+            Handles running necessary functions each tick
+            :return:
+            """
             screen.blit(self.background, (0, 0))
-            self.powerup_handler()
+
+            # Refresh every tank as long as it is alive
             for tank in self.tanks:
                 if tank.alive:
                     tank.move()
@@ -273,48 +286,61 @@ def start_2_player(screen):
                 else:
                     tank.dead()
                 tank.velocity = [0, 0]
-            for bullet in self.tanks[0].fired_bullets:
-                bullet.move()
-                bullet.draw()
-                bullet.lifespan()
-                bullet_decay_and_collision_handler(0, bullet, self.tanks)
-            for bullet in self.tanks[1].fired_bullets:
-                bullet.move()
-                bullet.draw()
-                bullet.lifespan()
-                bullet_decay_and_collision_handler(1, bullet, self.tanks)
+
+            # Refresh every tanks bullets
+            for i in range(2):
+                for bullet in self.tanks[i].fired_bullets:
+                    bullet.move()
+                    bullet.draw()
+                    bullet.lifespan()
+                    bullet_decay_and_collision_handler(i, bullet, self.tanks)
+
+            # Refresh the special bullets
             for bullet in special_bullets:
                 bullet.move()
                 bullet.draw()
                 bullet.lifespan()
                 special_decay_and_collision_handler(bullet, self.tanks, game)
+
+            # Handle powerups
+            self.powerup_handler()
             powerup_collision_handler(self.tanks, self.powerups)
+
+            # Handle all player inputs
             self.handle_inputs()
-            player_1_movement(self.tanks[0], game)
-            player_2_movement(self.tanks[1], game)
+
+            # Check for game end
             self.game_end_check()
 
         def handle_inputs(self):
             """
-            Input handler, allows quitting and firing - these actions can only happen once per keypress
+            Input handler for all players
             :return:
             """
+
+            # Handle all movement based input
+            player_1_movement(self.tanks[0], game)
+            player_2_movement(self.tanks[1], game)
+
+            # Handle other events
             for event in pygame.event.get():
                 if event.type == QUIT:
                     sys.exit()
 
+                # Check for keyboard firing - does not allow holding button down
                 if event.type == KEYDOWN:
-                    if event.key == K_e and self.tanks[0].alive:
+                    if event.key == K_e:
                         fire(0, self.tanks, screen, self.maze)
-                    if event.key == K_KP0 and self.tanks[1].alive:
-                        fire(1, self.tanks, screen, self.maze)
+                    if event.key == K_KP0:
+                        fire(2, self.tanks, screen, self.maze)
                     if event.key == K_ESCAPE:
                         game.game = False
 
+                # Check for joypad firing - does not allow holding button down
                 if event.type == JOYBUTTONDOWN:
-                    if event.button == 0 and event.joy == 0 and self.tanks[0].alive:
+                    if event.button == 0 and event.joy == 0:
                         fire(0, self.tanks, screen, self.maze)
-                    if event.button == 0 and event.joy == 1 and self.tanks[1].alive:
+                    if event.button == 0 and event.joy == 1:
                         fire(1, self.tanks, screen, self.maze)
 
 
@@ -357,9 +383,8 @@ def start_2_player(screen):
             # Random chance for powerup to spawn
             if randrange(0, 1000) >= 998:
 
-                # Get list of available spawnpoints
-                points = get_spawnpoints(self.maze_size, 2)
-                chosen_point = choice(points)
+                # Get random spawnpoint
+                chosen_point = get_spawnpoints(self.maze_size, 1)[0]
 
                 # Check that none of the powerups exist there already
                 if not any(item.position == chosen_point for item in self.powerups):
@@ -393,6 +418,9 @@ def start_3_player(screen):
             self.create_players()
             self.end_timer = 0
             self.powerups = []
+            # Initialise the joystick module
+            pygame.joystick.init()
+            # Ignore if any error occurs
             try:
                 self.p1 = pygame.joystick.Joystick(0)
                 self.p1.init()
@@ -418,7 +446,13 @@ def start_3_player(screen):
             return my_maze
 
         def refresh(self):
+            """
+            Handles running necessary functions each tick
+            :return:
+            """
             screen.blit(self.background, (0, 0))
+
+            # Refresh every tank as long as it is alive
             for tank in self.tanks:
                 if tank.alive:
                     tank.move()
@@ -426,29 +460,30 @@ def start_3_player(screen):
                 else:
                     tank.dead()
                 tank.velocity = [0, 0]
-            for bullet in self.tanks[0].fired_bullets:
-                bullet.move()
-                bullet.draw()
-                bullet.lifespan()
-                bullet_decay_and_collision_handler(0, bullet, self.tanks)
-            for bullet in self.tanks[1].fired_bullets:
-                bullet.move()
-                bullet.draw()
-                bullet.lifespan()
-                bullet_decay_and_collision_handler(1, bullet, self.tanks)
-            for bullet in self.tanks[2].fired_bullets:
-                bullet.move()
-                bullet.draw()
-                bullet.lifespan()
-                bullet_decay_and_collision_handler(2, bullet, self.tanks)
+
+            # Refresh every tanks bullets
+            for i in range(3):
+                for bullet in self.tanks[i].fired_bullets:
+                    bullet.move()
+                    bullet.draw()
+                    bullet.lifespan()
+                    bullet_decay_and_collision_handler(i, bullet, self.tanks)
+
+            # Refresh the special bullets
             for bullet in special_bullets:
                 bullet.move()
                 bullet.draw()
                 bullet.lifespan()
                 special_decay_and_collision_handler(bullet, self.tanks, game)
+
+            # Handle powerups
             self.powerup_handler()
             powerup_collision_handler(self.tanks, self.powerups)
+
+            # Handle all player inputs
             self.handle_inputs()
+
+            # Check for game end
             self.game_end_check()
 
         def handle_inputs(self):
@@ -456,12 +491,18 @@ def start_3_player(screen):
             Input handler for all players
             :return:
             """
+
+            # Handle all movement based input
             player_1_movement(self.tanks[0], game)
             player_2_movement(self.tanks[1], game)
             player_3_movement(self.tanks[2], game)
+
+            # Handle other events
             for event in pygame.event.get():
                 if event.type == QUIT:
                     sys.exit()
+
+                # Check for keyboard firing - does not allow holding button down
                 if event.type == KEYDOWN:
                     if event.key == K_e:
                         fire(0, self.tanks, screen, self.maze)
@@ -472,6 +513,7 @@ def start_3_player(screen):
                     if event.key == K_ESCAPE:
                         game.game = False
 
+                # Check for joypad firing - does not allow holding button down
                 if event.type == JOYBUTTONDOWN:
                     if event.button == 0 and event.joy == 0:
                         fire(0, self.tanks, screen, self.maze)
@@ -481,46 +523,73 @@ def start_3_player(screen):
                         fire(2, self.tanks, screen, self.maze)
 
         def create_players(self):
+            # Generate random spawnpoints
             tank_positions = get_spawnpoints(self.maze_size, 3)
+
+            # Spawn tanks in generated spawnpoints
             self.tanks.append(Tank(screen, tank_positions[0], "Player 1", "Assets/AFV1.png"))
             self.tanks.append(Tank(screen, tank_positions[1], "Player 2", "Assets/AFV2.png"))
             self.tanks.append(Tank(screen, tank_positions[2], "Player 3", "Assets/AFV3.png"))
 
         def game_end_check(self):
+            """
+            Check if the game can end, declare winner for scoring
+            :return:
+            """
+            # Check that only one or less tanks are alive
             if self.tanks[0].alive + self.tanks[1].alive + self.tanks[2].alive <= 1:
                 self.end_timer += 1
+                # 300 Tick delay
                 if self.end_timer >= 300:
+                    # If everyone is dead, restart game no points given
                     if not self.tanks[0].alive and not self.tanks[1].alive and not self.tanks[2].alive:
                         self.game = False
                         start_3_player(screen)
+                    # If tank 3 survives
                     elif not self.tanks[1].alive and not self.tanks[2].alive:
                         self.update_score(0)
                         self.game = False
                         start_3_player(screen)
+                    # If tank 2 survives
                     elif not self.tanks[0].alive and not self.tanks[2].alive:
                         self.update_score(1)
                         self.game = False
                         start_3_player(screen)
+                    # If tank 1 survives
                     elif not self.tanks[0].alive and not self.tanks[1]. alive:
                         self.update_score(2)
                         self.game = False
                         start_3_player(screen)
 
         def update_score(self, winner):
+            """
+            Updates scores for the winner
+            :param winner: index of winner in scores list
+            :return:
+            """
             scores[winner] += 1
             pygame.display.set_caption("Player 1: " + str(scores[0]) + "                   Player 2: " + str(scores[1]) + "                   Player3: " + str(scores[2]))
 
         def powerup_handler(self):
-            if len(self.powerups) < 12:
-                if randrange(0, 1000) >= 998:
-                    points = get_spawnpoints(self.maze_size, 2)
-                    chosen_point = choice(points)
-                    if not any(item.position == chosen_point for item in self.powerups):
-                        self.powerups.append(Powerup(screen, chosen_point))
-                for powerup in self.powerups:
-                    powerup.draw()
-                    if not powerup.alive:
-                        self.powerups.pop(self.powerups.index(powerup))
+            """
+            Choose location to spawn powerups, destroy dead ones
+            :return:
+            """
+            # Random chance for powerup to spawn
+            if randrange(0, 1000) >= 998:
+
+                # Get random spawnpoint
+                chosen_point = get_spawnpoints(self.maze_size, 1)[0]
+
+                # Check that none of the powerups exist there already
+                if not any(item.position == chosen_point for item in self.powerups):
+                    self.powerups.append(Powerup(screen, chosen_point))
+
+            # Draw every alive powerup, delete dead ones
+            for powerup in self.powerups:
+                powerup.draw()
+                if not powerup.alive:
+                    self.powerups.pop(self.powerups.index(powerup))
 
 
     game = MainGame()
@@ -536,7 +605,7 @@ def start_1_player(screen):
         """Class that handles some aspects of running the game, such as performing the regular calculations needed for
                 every refresh"""
         def __init__(self):
-            self.running = True
+            self.game = True
             self.maze_size = 7
             self.maze = self.new_maze()
             self.tanks = []
@@ -559,8 +628,13 @@ def start_1_player(screen):
             return my_maze
 
         def refresh(self):
+            """
+            Handles running necessary functions each tick
+            :return:
+            """
             screen.blit(self.background, (0, 0))
-            self.powerup_handler()
+
+            # Refresh every tank as long as it is alive
             for tank in self.tanks:
                 if tank.alive:
                     if tank == self.tanks[0]:
@@ -569,107 +643,126 @@ def start_1_player(screen):
                 else:
                     tank.dead()
                 tank.velocity = [0, 0]
-            for bullet in self.tanks[0].fired_bullets:
-                bullet.move()
-                bullet.draw()
-                bullet.lifespan()
-                bullet_decay_and_collision_handler(0, bullet, self.tanks)
-            for bullet in self.tanks[1].fired_bullets:
-                bullet.move()
-                bullet.draw()
-                bullet.lifespan()
-                bullet_decay_and_collision_handler(1, bullet, self.tanks)
+
+            # Refresh every tanks bullets
+            for i in range(2):
+                for bullet in self.tanks[i].fired_bullets:
+                    bullet.move()
+                    bullet.draw()
+                    bullet.lifespan()
+                    bullet_decay_and_collision_handler(i, bullet, self.tanks)
+
+            # Refresh the special bullets
             for bullet in special_bullets:
                 bullet.move()
                 bullet.draw()
                 bullet.lifespan()
                 special_decay_and_collision_handler(bullet, self.tanks, game)
+
+            # Handle powerups
+            self.powerup_handler()
             powerup_collision_handler(self.tanks, self.powerups)
+
+            # Handle all player inputs
             self.handle_inputs()
-            player_1_movement(self.tanks[0], game)
             ai.calculate()
+
+            # Check for game end
             self.game_end_check()
 
         def handle_inputs(self):
             """
-            Input handler, allows quitting and firing - these actions can only happen once per keypress
+            Input handler for all players
             :return:
             """
+
+            # Handle all movement based input
+            player_1_movement(self.tanks[0], game)
+
+            # Handle other events
             for event in pygame.event.get():
                 if event.type == QUIT:
                     sys.exit()
 
+                # Check for keyboard firing - does not allow holding button down
                 if event.type == KEYDOWN:
-                    if event.key == K_e and self.tanks[0].alive:
+                    if event.key == K_e:
                         fire(0, self.tanks, screen, self.maze)
-                    if event.key == K_KP0 and self.tanks[1].alive:
-                        fire(1, self.tanks, screen, self.maze)
                     if event.key == K_ESCAPE:
-                        game.running = False
+                        game.game = False
 
+                # Check for joypad firing - does not allow holding button down
                 if event.type == JOYBUTTONDOWN:
-                    if event.button == 0 and event.joy == 0 and self.tanks[0].alive:
+                    if event.button == 0 and event.joy == 0:
                         fire(0, self.tanks, screen, self.maze)
-                    if event.button == 0 and event.joy == 1 and self.tanks[1].alive:
-                        fire(1, self.tanks, screen, self.maze)
-
 
         def game_end_check(self):
+            # Check if any number of tanks are dead
             if not (self.tanks[0].alive and self.tanks[1].alive):
                 self.end_timer += 1
+                # Wait 350 ticks before continuing
                 if self.end_timer >= 350:
+                    # If everyone is dead, just restart game
                     if not self.tanks[0].alive and not self.tanks[1].alive:
-                        self.running = False
-                        start_1_player(screen)
+                        self.game = False
+                        start_2_player(screen)
+                    # If player 2 is dead
                     elif not self.tanks[1].alive:
                         self.update_score(0)
-                        self.running = False
-                        start_1_player(screen)
+                        self.game = False
+                        start_2_player(screen)
+                    # If player 1 is dead
                     elif not self.tanks[0].alive:
                         self.update_score(1)
-                        self.running = False
-                        start_1_player(screen)
+                        self.game = False
+                        start_2_player(screen)
 
         def update_score(self, winner):
             scores[winner] += 1
             pygame.display.set_caption("Player 1: " + str(scores[0]) + "                   Player 2: " + str(scores[1]))
 
-
-
         def create_players(self):
-            self.tank_positions = get_spawnpoints(self.maze_size, 2)
-            self.tanks.append(Tank(screen, self.tank_positions[0], "Player 1", "Assets/AFV1.png"))
-            self.tanks.append(Tank(screen, self.tank_positions[1], "Player 2", "Assets/AFV1.png"))
+            # Generate random spawnpoints
+            tank_positions = get_spawnpoints(self.maze_size, 3)
 
+            # Spawn tanks in generated spawnpoints
+            self.tanks.append(Tank(screen, tank_positions[0], "Player 1", "Assets/AFV1.png"))
+            self.tanks.append(Tank(screen, tank_positions[1], "Player 2", "Assets/AFV2.png"))
 
         def powerup_handler(self):
+            """
+            Choose location to spawn powerups, destroy dead ones
+            :return:
+            """
+            # Random chance for powerup to spawn
             if randrange(0, 1000) >= 998:
-                points = get_spawnpoints(self.maze_size, 2)
-                chosen_point = choice(points)
+
+                # Get random spawnpoint
+                chosen_point = get_spawnpoints(self.maze_size, 1)[0]
+
+                # Check that none of the powerups exist there already
                 if not any(item.position == chosen_point for item in self.powerups):
                     self.powerups.append(Powerup(screen, chosen_point))
+
+            # Draw every alive powerup, delete dead ones
             for powerup in self.powerups:
                 powerup.draw()
                 if not powerup.alive:
                     self.powerups.pop(self.powerups.index(powerup))
 
-
-
-
-
     # initialising of all arrays and objects preparing for game
     game = MainGame()
-    ai = Ai(game.tank_positions[1], game, game.tanks, screen)
+    ai = Ai(game, game.tanks, screen)
 
     # main game loop
-    while game.running:
+    while game.game:
         game.refresh()
         pygame.display.update()
         fps_clock.tick(FPS)
 
 
 class Ai:
-    def __init__(self, position, game, tanks, screen):
+    def __init__(self, game, tanks, screen):
         self.game = game
         self.current_movement = None
         self.tanks = tanks
@@ -681,14 +774,21 @@ class Ai:
         self.previous_movement = 0
 
     def get_player_angle(self):
+        # Get positions of both tanks
         enemy_position = self.tanks[0].position
         my_position = self.tanks[1].position
+
+        # Break down positions into x and y
         enemy_x = enemy_position[0]
         enemy_y = enemy_position[1]
         my_x = my_position[0]
         my_y = my_position[1]
+
+        # Get the difference in x and y for players
         x_diff = enemy_x - my_x
         y_diff = enemy_y - my_y
+
+        # Check the 'quadrant' of the player - similar to controller movement
         if x_diff > 0:
             if y_diff > 0:
                 return arctandeg(x_diff, -y_diff)
@@ -700,20 +800,27 @@ class Ai:
 
 
     def shoot_at_player(self):
+        # Turn to player
         self.tanks[1].set_angle(self.get_player_angle())
-        print(self.tanks[1].angle)
+
+        # Have a small delay in firing at player
         self.fire_delay += 1
         if self.fire_delay >= 10:
             fire(1, self.tanks, self.screen, self.game.maze.maze)
             self.fire_delay = 0
 
     def move(self):
-        self.fire_delay = 10000
+        # Reset fire delay
+        self.fire_delay = 10
+
+        # Get the current maze coordinates of the tank
         current_grid = get_player_grid(self.tanks[1].position, self.game.maze_size, window_size)
+
+        # Check if a movement direction has been assigned
         if self.current_movement is None:
+            # Create a list and fill it with directions walls are not.
             available_moves = []
             walls_up = self.game.maze.maze[current_grid[0]][current_grid[1]]
-            print("walls:", walls_up)
             if not walls_up & NORTH and not self.previous_movement == NORTH:
                 available_moves.append(NORTH)
             if not walls_up & SOUTH and not self.previous_movement == SOUTH:
@@ -722,38 +829,62 @@ class Ai:
                 available_moves.append(EAST)
             if not walls_up & WEST and not self.previous_movement == WEST:
                 available_moves.append(WEST)
-            print("moves:", available_moves)
+
+            # If there is only 1 wall down which has been visited, add that direction to the list
             if not available_moves:
                 available_moves.append(self.previous_movement)
+
+            # Choose one of the directions in the list randomly
             self.current_movement = choice(available_moves)
 
-            print("moving", self.current_movement)
-
+            # Set current grid reference as previous
             self.previous_grid = current_grid
+
         if self.current_movement == NORTH:
+            # Check if we are out of the previous grid reference yet
             if not current_grid == self.previous_grid:
                 self.stop_moving()
+
+            # Move at 2* normal player speed in north direction
             self.tanks[1].position[1] -= 2
+            # Set angle to look more natural
             self.tanks[1].set_angle(90)
+
         if self.current_movement == SOUTH:
+            # Check if we are out of the previous grid reference yet
             if not current_grid == self.previous_grid:
                 self.stop_moving()
+
+            # Move at 2* normal player speed in south direction
             self.tanks[1].position[1] += 2
+            # Set angle to look more natural
             self.tanks[1].set_angle(270)
+
         if self.current_movement == EAST:
+            # Check if we are out of the previous grid reference yet
             if not current_grid == self.previous_grid:
                 self.stop_moving()
+
+            # Move at 2* normal player speed in east direction
             self.tanks[1].position[0] += 2
+            # Set angle to look more natural
             self.tanks[1].set_angle(0)
+
         if self.current_movement == WEST:
+            # Check if we are out of the previous grid reference yet
             if not current_grid == self.previous_grid:
                 self.stop_moving()
+
+            # Move at 2* normal player speed in west direction
             self.tanks[1].position[0] -= 2
+            # Set angle to look more natural
             self.tanks[1].set_angle(180)
 
     def stop_moving(self):
+        # Allow movement of 25 ticks into area before stopping
         self.delay += 1
         if self.delay >= 25:
+            # Set previous direction to prevent backtracking
             if self.current_movement == NORTH:
                 self.previous_movement = SOUTH
             if self.current_movement == EAST:
@@ -763,13 +894,23 @@ class Ai:
             if self.current_movement == WEST:
                 self.previous_movement = EAST
 
+            # Reset movement direction
             self.current_movement = None
+            # Reset counter
             self.delay = 0
 
     def calculate(self):
+        """
+        Decide what to do
+        :return:
+        """
+        # Get player positions
         enemy_position = self.tanks[0].position
         my_position = self.tanks[1].position
+
+        # Calculate player distance
         enemy_distance = ((enemy_position[0] - my_position[0]) ** 2 + (enemy_position[1] - my_position[1]) ** 2) ** 0.5
+
         if enemy_distance < 100:
             self.shoot_at_player()
         else:

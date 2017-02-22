@@ -193,7 +193,7 @@ class WallDestroyer:
         self.circle = pygame.draw.circle(screen, (0, 200, 1), (int(position[0]), int(position[1])), 2)
         self.alive = True
         self.lifetime = 0
-        self.type = 1
+        self.type = 2
 
     def set_velocity(self, velocity):
         self.velocity = velocity
