@@ -332,7 +332,7 @@ def start_2_player(screen):
                     if event.key == K_e:
                         fire(0, self.tanks, screen, self.maze)
                     if event.key == K_KP0:
-                        fire(2, self.tanks, screen, self.maze)
+                        fire(1, self.tanks, screen, self.maze)
                     if event.key == K_ESCAPE:
                         game.game = False
 
