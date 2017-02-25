@@ -41,9 +41,9 @@ def title_screen():
         button("Help", 680, 720, 100, 60, help_screen)
 
         # Draw extra text each refresh
-        text_surf1, text_rect1 = text_objects("Armoured Fighting", pygame.font.SysFont('Arial', 70))
+        text_surf1, text_rect1 = text_objects("Armoured Fighting", pygame.font.Font('Assets/Ubuntu.ttf', 70))
         text_rect1.center = ((400, 60))
-        text_surf2, text_rect2 = text_objects("Vehicle Dissatisfaction", pygame.font.SysFont('Arial', 70))
+        text_surf2, text_rect2 = text_objects("Vehicle Dissatisfaction", pygame.font.Font('Assets/Ubuntu.ttf', 70))
         text_rect2.center = ((400, 140))
         screen.blit(text_surf1, text_rect1)
         screen.blit(text_surf2, text_rect2)
@@ -84,7 +84,7 @@ def button(text, x, y, width, height, action=None):
         pygame.draw.rect(screen, (31, 196, 209), (x, y, width, height))
 
     # Obtain text and blit to screen
-    text_surf, text_rect = text_objects(text, pygame.font.SysFont("Arial", 40))
+    text_surf, text_rect = text_objects(text, pygame.font.Font("Assets/Ubuntu.ttf", 40))
     text_rect.center = ((x + (width / 2)), (y + (height / 2)))
     screen.blit(text_surf, text_rect)
 
